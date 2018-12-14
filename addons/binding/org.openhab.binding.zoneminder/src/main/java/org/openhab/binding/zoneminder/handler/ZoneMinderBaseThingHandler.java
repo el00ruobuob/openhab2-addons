@@ -43,12 +43,10 @@ import name.eskildsen.zoneminder.IZoneMinderConnectionHandler;
  * @author Martin S. Eskildsen - Initial contribution
  */
 public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implements IZoneMinderHandler {
-    // https://www.eclipse.org/smarthome/documentation/development/bindings/thing-handler.html
+    private final Logger logger = LoggerFactory.getLogger(ZoneMinderBaseThingHandler.class);
+
     private final ReentrantLock lockRefresh = new ReentrantLock();
     private final ReentrantLock lockAlarm = new ReentrantLock();
-
-    /** Logger for the Thing. */
-    private Logger logger = LoggerFactory.getLogger(ZoneMinderBaseThingHandler.class);
 
     /** Bridge Handler for the Thing. */
     public ZoneMinderServerBridgeHandler zoneMinderBridgeHandler;
@@ -85,15 +83,13 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
         super(thing);
     }
 
-    /**
-     * Initializes the monitor.
-     *
-     * @author Martin S. Eskildsen
-     *
-     */
     @Override
     public void initialize() {
         updateStatus(ThingStatus.OFFLINE);
+    }
+
+    @Override
+    public void dispose() {
     }
 
     protected boolean isConnected() {
@@ -113,11 +109,14 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
     }
 
     private IZoneMinderConnectionHandler aquireSessionInternal(boolean timeout) {
-        boolean result = true;
-        if (result) {
-            return zoneMinderConnection;
+        Bridge bridge = getBridge();
+        if (bridge != null) {
+            ZoneMinderServerBridgeHandler bh = ((ZoneMinderServerBridgeHandler) bridge.getHandler());
+            if (bh != null) {
+                zoneMinderConnection = bh.getZoneMinderConnection();
+                return bh.getZoneMinderConnection();
+            }
         }
-
         return null;
     }
 
@@ -197,15 +196,10 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
     protected void onThingStatusChanged(ThingStatus thingStatus) {
     }
 
-    @Override
-    public void dispose() {
-    }
-
     /**
      * Helper method for getting ChannelUID from ChannelId.
      *
      */
-
     public ChannelUID getChannelUIDFromChannelId(@NonNull String id) {
         Channel ch = thing.getChannel(id);
         if (ch == null) {
@@ -225,11 +219,9 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
             if (!isConnected()) {
                 return;
             }
-
             if (refreshPriority == RefreshPriority.PRIORITY_ALARM) {
                 if (!lockRefresh.tryLock()) {
-                    logger.warn(
-                            "{}: context='refreshThing' Failed to obtain refresh lock for '{}' - refreshThing skipped!",
+                    logger.warn("{}: context='refreshThing' Can't get refresh lock for '{}' - skipping refreshThing",
                             getLogIdentifier(), getThing().getUID());
                     isLocked = false;
                     return;
@@ -242,15 +234,14 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
             if (getZoneMinderBridgeHandler() != null) {
                 onFetchData(refreshPriority);
             } else {
-                logger.warn(
-                        "{}: context='refreshThing' - BridgeHandler was not accessible for '{}', skipping refreshThing",
+                logger.warn("{}: context='refreshThing' - BridgeHandler not accessible for '{}', skipping refreshThing",
                         getLogIdentifier(), getThing().getUID());
             }
 
             if (!isThingRefreshed()) {
                 Thing thing = getThing();
                 List<Channel> channels = thing.getChannels();
-                logger.debug("{}: context=refreshThing': Refreshing Channels for '{}'", getLogIdentifier(),
+                logger.trace("{}: context=refreshThing': Refreshing Channels for '{}'", getLogIdentifier(),
                         thing.getUID());
 
                 for (Channel channel : channels) {
@@ -315,8 +306,7 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
                 updateState(channel, getChannelBoolAsOnOffState(isThingOnline()));
                 break;
             default:
-                logger.error(
-                        "{}: updateChannel() in base class, called for an unknown channel '{}', this channel must be handled in super class.",
+                logger.error("{}: updateChannel() unknown channel in base class '{}', must be handled in super class.",
                         getLogIdentifier(), channel.getId());
         }
     }
@@ -331,6 +321,11 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
     }
 
     @Override
+    public void onBridgeConnected(ZoneMinderServerBridgeHandler bridge, IZoneMinderConnectionHandler connection) {
+        zoneMinderConnection = connection;
+    }
+
+    @Override
     public void onBridgeDisconnected(ZoneMinderServerBridgeHandler bridge) {
         zoneMinderConnection = null;
     }
@@ -342,7 +337,6 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
      */
     public Channel getChannel(ChannelUID channelUID) {
         Channel channel = null;
-
         List<Channel> channels = getThing().getChannels();
 
         for (Channel ch : channels) {
@@ -351,7 +345,6 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
                 break;
             }
         }
-
         return channel;
     }
 
@@ -444,11 +437,6 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
     }
 
     @Override
-    public void onBridgeConnected(ZoneMinderServerBridgeHandler bridge, IZoneMinderConnectionHandler connection) {
-        zoneMinderConnection = connection;
-    }
-
-    @Override
     public abstract String getLogIdentifier();
 
     protected void updateThingStatus(ThingStatus thingStatus, ThingStatusDetail statusDetail,
@@ -469,7 +457,6 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
                         thingStatus);
                 updateStatus(thingStatus);
             }
-
             onThingStatusChanged(thingStatus);
         }
     }
