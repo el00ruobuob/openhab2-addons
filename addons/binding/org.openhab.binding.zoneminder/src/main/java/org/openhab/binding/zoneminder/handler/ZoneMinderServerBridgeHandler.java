@@ -52,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
+import com.google.gson.JsonSyntaxException;
 
 import name.eskildsen.zoneminder.IZoneMinderConnectionHandler;
 import name.eskildsen.zoneminder.IZoneMinderEventSession;
@@ -807,7 +808,15 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         config.getTelnetPort(), config.getServerBasePath(), config.getServerApiPath());
 
             }
-
+        } catch (JsonSyntaxException ex) {
+            logger.error("{}: context='{}' check='FAILED' - Malformed JSON response. Retry next cycle...",
+                    getLogIdentifier(), context);
+            newStatus = ThingStatus.OFFLINE;
+            statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
+            statusDescription = "ZoneMinder returned malformed JSON";
+            updateStatus(newStatus, statusDetail, statusDescription);
+            status = ZoneMinderConnectionStatus.GENERAL_ERROR;
+            return status;
         } catch (ZoneMinderAuthenticationException authenticationException) {
             String detailedMessage = "";
             setConnectionStatus(ZoneMinderConnectionStatus.BINDING_CONFIG_INVALID);
@@ -819,8 +828,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 }
 
             }
-            logger.error(
-                    "{}: context='{}' check='FAILED' - Failed to login to ZoneMinder Server.  Check provided usercredentials (Exception='{}', {})",
+            logger.error("{}: context='{}' check='FAILED' - Failed to login.  Check credentials (Exception='{}', {})",
                     getLogIdentifier(), context, authenticationException.getMessage(), detailedMessage,
                     authenticationException);
             newStatus = ThingStatus.OFFLINE;
@@ -829,22 +837,19 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             updateStatus(newStatus, statusDetail, statusDescription);
             status = ZoneMinderConnectionStatus.SERVER_CREDENTIALS_INVALID;
             return status;
-
         } catch (ZoneMinderApiNotEnabledException e) {
             setConnectionStatus(ZoneMinderConnectionStatus.SERVER_API_DISABLED);
             logger.error(
-                    "{}: context='{}' check='FAILED' - ZoneMinder Server API is not enabled. Enable option in ZoneMinder Server Settings and restart openHAB Binding.",
-                    getLogIdentifier(), context, e);
+                    "{}: context='{}' check='FAILED' - API not enabled. Enable in ZoneMinder Server Settings and restart openHAB Binding.",
+                    getLogIdentifier(), context);
             newStatus = ThingStatus.OFFLINE;
             statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
             statusDescription = "ZoneMinder Server 'OPT_USE_API' not enabled";
             updateStatus(newStatus, statusDetail, statusDescription);
             status = ZoneMinderConnectionStatus.SERVER_API_DISABLED;
             return status;
-
         } catch (ZoneMinderException | Exception e) {
-            logger.error(
-                    "{}: context='{}' check='FAILED' - General error when creating ConnectionInfo. Retrying next cycle...",
+            logger.error("{}: context='{}' check='FAILED' - Error creating ConnectionInfo. Retrying next cycle...",
                     getLogIdentifier(), context, e);
             newStatus = ThingStatus.OFFLINE;
             statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
@@ -852,7 +857,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             updateStatus(newStatus, statusDetail, statusDescription);
             status = ZoneMinderConnectionStatus.GENERAL_ERROR;
             return status;
-
         } finally {
             releaseSession();
         }
