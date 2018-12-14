@@ -69,15 +69,17 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Sets
             .newHashSet(ZoneMinderConstants.THING_TYPE_THING_ZONEMINDER_MONITOR);
 
-    private static final String MONITOR_STATUS_NOT_INIT = "<Not Initialized>";
-    private static final int MAX_MONITOR_STATUS_WATCH_COUNT = 3;
+    // TODO Not used
+    // private static final String MONITOR_STATUS_NOT_INIT = "<Not Initialized>";
+    // private static final int MAX_MONITOR_STATUS_WATCH_COUNT = 3;
 
     /** Make sure we can log errors, warnings or what ever somewhere */
     private final Logger logger = LoggerFactory.getLogger(ZoneMinderThingMonitorHandler.class);
     private RefreshPriority forcedPriority = RefreshPriority.DISABLED;
 
-    private String lastMonitorStatus = MONITOR_STATUS_NOT_INIT;
-    private Integer monitorStatusMatchCount = 3;
+    // TODO Not used
+    // private String lastMonitorStatus = MONITOR_STATUS_NOT_INIT;
+    // private Integer monitorStatusMatchCount = 3;
 
     private ZoneMinderThingMonitorConfig config;
 

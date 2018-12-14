@@ -446,7 +446,7 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
 
         // Status changed
         if (!curStatusInfo.getStatus().equals(thingStatus) || !curStatusInfo.getStatusDetail().equals(statusDetail)
-                || !curDescription.equals(statusDescription)) {
+                || !statusDescription.equals(curDescription)) {
             // Update Status correspondingly
             if ((thingStatus == ThingStatus.OFFLINE) && (statusDetail != ThingStatusDetail.NONE)) {
                 logger.debug("{}: Thing status changed from '{}' to '{}' (DetailedStatus='{}', Description='{}')",

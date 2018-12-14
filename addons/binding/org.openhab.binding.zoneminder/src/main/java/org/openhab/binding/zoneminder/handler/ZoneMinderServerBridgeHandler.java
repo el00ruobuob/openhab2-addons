@@ -352,7 +352,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         for (Thing thing : things) {
             ZoneMinderBaseThingHandler thingHandler = (ZoneMinderBaseThingHandler) thing.getHandler();
 
-            if ((thingHandler.getZoneMinderId().equals(zoneMinderId))
+            if (thingHandler != null && (thingHandler.getZoneMinderId().equals(zoneMinderId))
                     && (thing.getThingTypeUID().equals(thingTypeUID))) {
                 return thingHandler;
             }
@@ -1119,7 +1119,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                     try {
                         hostVersion = serverProxy.getHostVersion();
                     } catch (ZoneMinderException ex) {
-                        hostVersion = null;
+                        // TODO Eat this?
                     }
 
                     if ((hostVersion == null) || (hostVersion.getHttpStatus() >= 400)) {
@@ -1127,9 +1127,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         statusDetail = ThingStatusDetail.COMMUNICATION_ERROR;
                         statusDescription = "Connection to ZoneMinder Server was lost";
                         updateBridgeStatus(newStatus, statusDetail, statusDescription, false);
-
                         logger.error("{}: Lost connection to ZoneMinder server.", getLogIdentifier());
-
                         setConnected(false);
                     }
 
@@ -1147,8 +1145,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                     }
                     // Verify that 'OPT_TRIGGER' is set to true in ZoneMinder
                     else if (!serverProxy.isTriggerOptionEnabled()) {
-                        logger.error(
-                                "{}: context='{}' Bridge OFFLINE because ZoneMinder Server OPT_TRIGGER was disabled",
+                        logger.error("{}: context='{}' Bridge OFFLINE because ZoneMinder OPT_TRIGGER was disabled",
                                 getLogIdentifier(), context);
                         zmConnectStatus = ZoneMinderConnectionStatus.SERVER_OPT_TRIGGERS_DISABLED;
                         newStatus = ThingStatus.OFFLINE;
@@ -1190,7 +1187,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         }
                     }
                 }
-
             } else if (prevStatus == ThingStatus.OFFLINE) {
                 initializeAvaliabilityStatus(conn);
 
@@ -1458,7 +1454,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             if (discoveryService == null) {
                 discoveryService = new ZoneMinderDiscoveryService(this, 30);
             }
-
             discoveryService.activate();
 
             if (discoveryRegistration == null) {
@@ -1467,29 +1462,22 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         discoveryService, new Hashtable<String, Object>());
             }
         } catch (Exception e) {
-            logger.error("{}: context='onBridgeConnected' Exception occurred when starting discovery service",
-                    getLogIdentifier(), e.getCause());
-
+            logger.error("{}: context='onBridgeConnected' Exception starting discovery service", getLogIdentifier(), e);
         }
 
         try {
             // Update properties
             updateServerProperties();
         } catch (Exception e) {
-            logger.error(
-                    "{}: method='onBridgeConnected' context='updateServerProperties' Exception occurred when starting discovery service",
-                    getLogIdentifier(), e.getCause());
-
+            logger.error("{}: context='onBridgeConnected' Exception starting discovery service", getLogIdentifier(), e);
         }
 
         if (taskRefreshData != null) {
             taskRefreshData.cancel(true);
             taskRefreshData = null;
         }
-
         // Start job to handle next updates
         taskRefreshData = startTask(refreshDataRunnable, 1, 1, TimeUnit.SECONDS);
-
     }
 
     @Override
@@ -1527,29 +1515,27 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 logger.error("thingHandler is {}", thing.getHandler(), e);
             }
         }
-
     }
 
     /**
      * Method to start a data refresh task.
      */
     protected ScheduledFuture<?> startTask(Runnable command, long delay, long interval, TimeUnit unit) {
-        logger.debug("{}: Starting ZoneMinder Bridge Monitor Task. Command='{}'", getLogIdentifier(),
+        logger.debug("{}: Starting ZoneMinder Bridge Monitor refresh task. Command='{}'", getLogIdentifier(),
                 command.toString());
         if (interval == 0) {
             return null;
         }
-
         return scheduler.scheduleWithFixedDelay(command, delay, interval, unit);
     }
 
     /**
-     * Method to stop the datarefresh task.
+     * Method to stop the data refresh task.
      */
     protected void stopTask(ScheduledFuture<?> task) {
         try {
             if (task != null && !task.isCancelled()) {
-                logger.debug("{}: Stopping ZoneMinder Bridge Monitor Task. Task='{}'", getLogIdentifier(),
+                logger.debug("{}: Stopping ZoneMinder Bridge Monitor refresh task. Task='{}'", getLogIdentifier(),
                         task.toString());
                 task.cancel(true);
             }
@@ -1610,7 +1596,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             properties.put(ZoneMinderProperties.PROPERTY_SERVER_USE_AUTH_HASH, configAllowHashLogin.getValueAsString());
             properties.put(ZoneMinderProperties.PROPERTY_SERVER_TRIGGERS_ENABLED, configTrigerrs.getValueAsString());
             properties.put(ZoneMinderProperties.PROPERTY_SERVER_FRAME_SERVER, configFrameServer.getValueAsString());
-
         } catch (ZoneMinderUrlNotFoundException | IOException | ZoneMinderGeneralException | ZoneMinderResponseException
                 | ZoneMinderInvalidData | ZoneMinderAuthenticationException e) {
             logger.warn("{}: Exception occurred when updating monitor properties", getLogIdentifier(), e);
@@ -1630,7 +1615,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 break;
             }
         }
-
         if (update) {
             logger.debug("{}: Properties synchronised, Thing id: {}", getLogIdentifier(), getThingId());
             updateProperties(properties);
