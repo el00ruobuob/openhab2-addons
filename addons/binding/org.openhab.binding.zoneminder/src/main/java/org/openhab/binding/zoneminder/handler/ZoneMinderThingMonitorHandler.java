@@ -94,7 +94,32 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
     }
 
     @Override
+    public void initialize() {
+        logger.info("{}:  context='initialize' Initializing monitor handler", getLogIdentifier());
+        try {
+            this.config = getMonitorConfig();
+
+            super.initialize();
+            logger.debug("{}: context='initialize' Monitor Handler Initialized", getLogIdentifier());
+
+            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FORCE_ALARM));
+            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_CAUSE));
+            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_RECORD_STATE));
+            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_MOTION_EVENT));
+            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_DETAILED_STATUS));
+            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_ENABLED));
+            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FUNCTION));
+            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_STATE));
+
+        } catch (Exception ex) {
+            logger.error("{}: Exception occurred when calling 'initialize()'. Exception='{}'", getLogIdentifier(),
+                    ex.getMessage());
+        }
+    }
+
+    @Override
     public void dispose() {
+        logger.info("{}:  context='dispose' Disposing monitor handler", getLogIdentifier());
         try {
             ZoneMinderServerBridgeHandler bridge = getZoneMinderBridgeHandler();
             logger.debug("{}: Unsubscribing from Monitor Events: {}", getLogIdentifier(),
@@ -449,29 +474,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
         } catch (Exception ex) {
             logger.error("{}: handleCommand: Command='{}' failed for channel='{}'", getLogIdentifier(), command,
                     channelUID.getId(), ex);
-        }
-    }
-
-    @Override
-    public void initialize() {
-        try {
-            this.config = getMonitorConfig();
-
-            super.initialize();
-            logger.debug("{}: context='initialize' Monitor Handler Initialized", getLogIdentifier());
-
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FORCE_ALARM));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_CAUSE));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_RECORD_STATE));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_MOTION_EVENT));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_DETAILED_STATUS));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_ENABLED));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FUNCTION));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_STATE));
-
-        } catch (Exception ex) {
-            logger.error("{}: Exception occurred when calling 'initialize()'. Exception='{}'", getLogIdentifier(),
-                    ex.getMessage());
         }
     }
 
