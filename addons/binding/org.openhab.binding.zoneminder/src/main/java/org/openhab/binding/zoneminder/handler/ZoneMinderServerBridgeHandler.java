@@ -89,7 +89,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
     /**
      * Logger
      */
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ZoneMinderConnectionStatus zmConnectStatus = ZoneMinderConnectionStatus.UNINITIALIZED;
     private ZoneMinderConnectionStatus lastSucceededStatus = ZoneMinderConnectionStatus.UNINITIALIZED;
@@ -223,7 +223,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             updateStatus(ThingStatus.OFFLINE);
 
             ZoneMinderBridgeServerConfig config = getBridgeConfig();
-            logger.debug("{}: ZoneMinder Server Bridge Handler Initialized", getLogIdentifier());
+            logger.info("{}: ZoneMinder Bridge Handler Initialized", getLogIdentifier());
             logger.debug("{}:    HostName:           {}", getLogIdentifier(), config.getHost());
             logger.debug("{}:    Protocol:           {}", getLogIdentifier(), config.getProtocol());
             logger.debug("{}:    Port HTTP(S)        {}", getLogIdentifier(), config.getHttpPort());
@@ -249,9 +249,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             }
 
         }
-
         initialized = false;
-
     }
 
     protected IZoneMinderConnectionHandler aquireSession() {
@@ -1207,14 +1205,13 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             // Hmmm We shouldn't really end here.
             logger.error(
                     "{}: context='updateAvailablilityStatus' Exception occurred in updateAvailabilityStatus Exception='{}'",
-                    getLogIdentifier(), ex.getMessage(), ex.getCause());
+                    getLogIdentifier(), ex.getMessage(), ex.getCause(), ex);
             zmConnectStatus = ZoneMinderConnectionStatus.GENERAL_ERROR;
             newStatus = ThingStatus.OFFLINE;
             statusDetail = ThingStatusDetail.COMMUNICATION_ERROR;
             statusDescription = "General error occurred (Check log)";
             updateBridgeStatus(newStatus, statusDetail, statusDescription, true);
         }
-
     }
 
     protected void updateBridgeStatus(ThingStatus newStatus, ThingStatusDetail statusDetail, String statusDescription,
@@ -1241,8 +1238,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         setConnected(false);
                     } catch (IllegalArgumentException | GeneralSecurityException | IOException
                             | ZoneMinderUrlNotFoundException e) {
-                        logger.error(
-                                "{}: context='updateBridgeStatus' Exception occurred when changing connected status",
+                        logger.error("{}: context='updateBridgeStatus' Exception when changing connected status",
                                 getLogIdentifier(), e);
                     }
                 }
@@ -1254,8 +1250,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         setConnected(true);
                     } catch (IllegalArgumentException | GeneralSecurityException | IOException
                             | ZoneMinderUrlNotFoundException e) {
-                        logger.error(
-                                "{}: context='updateBridgeStatus' Exception occurred when changing connected status",
+                        logger.error("{}: context='updateBridgeStatus' Exception when changing connected status",
                                 getLogIdentifier(), e);
                     }
                 }
@@ -1310,7 +1305,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         } catch (Exception ex) {
             logger.error(
                     "{}: context='updateChannel' Error when 'updateChannel()' was called for thing='{}' (Exception='{}'",
-                    getLogIdentifier(), channel.getId(), ex.getMessage());
+                    getLogIdentifier(), channel.getId(), ex.getMessage(), ex);
         }
     }
 
@@ -1502,7 +1497,9 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         logger.debug("{}: Brigde went OFFLINE", getLogIdentifier());
 
         // Deactivate discovery service
-        discoveryService.deactivate();
+        if (discoveryService != null) {
+            discoveryService.deactivate();
+        }
 
         // Stopping refresh thread while OFFLINE
         if (taskRefreshData != null) {
