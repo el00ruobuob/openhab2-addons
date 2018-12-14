@@ -390,7 +390,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 // Make sure old data is cleared
                 channelCpuLoad = "";
                 channelDiskUsage = "";
-
             } else if (isConnected()) {
                 /*
                  * Fetch data for Bridge
@@ -399,7 +398,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                     IZoneMinderHostLoad hostLoad = null;
                     try {
                         hostLoad = zoneMinderServerProxy.getHostCpuLoad();
-                        logger.debug("{}: URL='{}' ResponseCode='{}' ResponseMessage='{}'", getLogIdentifier(),
+                        logger.trace("{}: URL='{}' ResponseCode='{}' ResponseMessage='{}'", getLogIdentifier(),
                                 hostLoad.getHttpRequestUrl(), hostLoad.getHttpStatus(),
                                 hostLoad.getHttpResponseMessage());
 
@@ -428,7 +427,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         IZoneMinderDiskUsage diskUsage = null;
                         try {
                             diskUsage = zoneMinderServerProxy.getHostDiskUsage();
-                            logger.debug("{}: URL='{}' ResponseCode='{}' ResponseMessage='{}'", getLogIdentifier(),
+                            logger.trace("{}: URL='{}' ResponseCode='{}' ResponseMessage='{}'", getLogIdentifier(),
                                     diskUsage.getHttpRequestUrl(), diskUsage.getHttpStatus(),
                                     diskUsage.getHttpResponseMessage());
                         } catch (Exception ex) {
@@ -468,14 +467,12 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             if (zoneMinderServerProxy != null) {
                 releaseSession();
             }
-
         }
 
         /*
          * Update all channels on Bridge
          */
         for (Channel channel : channels) {
-
             if (isLinked(channel.getUID().getId())) {
                 updateChannel(channel.getUID());
             }
@@ -497,9 +494,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 logger.error("{}: context='refreshThing' tag='exception' Exception thrown when refreshing thing='{}'",
                         getLogIdentifier(), thing.getUID(), ex.getCause());
             }
-
         }
-
     }
 
     /**
