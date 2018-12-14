@@ -56,7 +56,7 @@ public class ZoneMinderDiscoveryService extends AbstractDiscoveryService {
 
     @Override
     public void startBackgroundDiscovery() {
-        logger.debug("[DISCOVERY]: Performing background discovery scan for {}", serverHandler.getThing().getUID());
+        logger.trace("[DISCOVERY]: Performing background discovery scan for {}", serverHandler.getThing().getUID());
         // removeOlderResults(getTimestampOfLastScan());
         discoverMonitors();
     }
@@ -85,10 +85,11 @@ public class ZoneMinderDiscoveryService extends AbstractDiscoveryService {
         for (IMonitorDataGeneral monitorData : serverHandler.getMonitors()) {
             ThingUID thingUID = getMonitorThingUID(monitorData);
 
-            logger.debug("[DISCOVERY]: Monitor with Id='{}' and Name='{}' added to Inbox with ThingUID='{}'",
+            logger.trace("[DISCOVERY]: Monitor with Id='{}' and Name='{}' added to Inbox with ThingUID='{}'",
                     monitorData.getId(), monitorData.getName(), thingUID);
 
-            thingDiscovered(createMonitorDiscoveryResult(thingUID, monitorData));
+            DiscoveryResult discoveryResult = createMonitorDiscoveryResult(thingUID, monitorData);
+            thingDiscovered(discoveryResult);
         }
     }
 
