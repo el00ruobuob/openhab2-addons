@@ -152,7 +152,8 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
 
     private ScheduledFuture<?> taskRefreshData = null;
 
-    private IZoneMinderConnectionHandler getZoneMinderConnection() {
+    // TODO Was private
+    public IZoneMinderConnectionHandler getZoneMinderConnection() {
         return zoneMinderConnection;
     }
 

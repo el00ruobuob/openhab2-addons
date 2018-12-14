@@ -200,7 +200,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                     | ZoneMinderResponseException ex) {
                 logger.error("{}: context='onThingStatusChanged' error in call to 'getMonitorData' - Message='{}'",
                         getLogIdentifier(), ex.getMessage(), ex.getCause());
-
             } finally {
                 if (connection != null) {
                     releaseSession();
@@ -209,12 +208,10 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
 
             try {
                 updateMonitorProperties();
-
             } catch (Exception ex) {
                 logger.error(
                         "{}: context='onThingStatusChanged' - Exception occurred when calling 'updateMonitorPropoerties()'. Exception='{}'",
                         getLogIdentifier(), ex.getMessage());
-
             }
         }
     }
@@ -226,15 +223,12 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                 dataConverter.subscribe(channelUID);
             }
             super.channelLinked(channelUID);
-
             logger.debug("{}: context='channelLinked' - Unlinking from channel '{}'", getLogIdentifier(),
                     channelUID.getAsString());
         } catch (Exception ex) {
             logger.debug("{}: context='channelUnlinked' - Exception when Unlinking from channel '{}' - EXCEPTION)'{}'",
                     getLogIdentifier(), channelUID.getAsString(), ex.getMessage());
-
         }
-
     }
 
     @Override
@@ -247,7 +241,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
         } catch (Exception ex) {
             logger.debug("{}: context='channelUnlinked' - Exception when Unlinking from channel '{}' - EXCEPTION)'{}'",
                     getLogIdentifier(), channelUID.getAsString(), ex.getMessage());
-
         }
     }
 
@@ -321,13 +314,11 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
 
                                     }
                                     fetchMonitorGeneralData(monitorProxy);
-
                                 } catch (Exception ex) {
                                     logger.error(
                                             "{}: Context='handleCommand' Channel='{}' EXCEPTION:  Call to 'ForceAlarm' Command='{}' failed",
                                             getLogIdentifier(), channelUID.getId(), command, ex);
                                 }
-
                             }
                         } else {
                             logger.warn(
@@ -343,7 +334,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                             monitorProxy = null;
                             releaseSession();
                         }
-
                         requestChannelRefresh();
                     }
                     break;
@@ -390,7 +380,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                     } catch (Exception ex) {
                         logger.error("{}: Exception in 'handleCommand' => 'CHANNEL_MONITOR_ENABLE' Exception='{}'",
                                 getLogIdentifier(), ex.getMessage());
-
                     } finally {
                         requestChannelRefresh();
                     }
@@ -438,7 +427,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                             logger.debug(
                                     "{}: context='handleCommand' tags='function' - Successfully changed function setting to '{}'",
                                     getLogIdentifier(), commandString);
-
                         } else {
                             logger.error(
                                     "{}: Value '{}' for monitor channel is not valid. Accepted values is: 'None', 'Monitor', 'Modect', Record', 'Mocord', 'Nodect'",
@@ -447,12 +435,9 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                     } catch (Exception ex) {
                         logger.error("{}: Exception in 'handleCommand' => 'CHANNEL_MONITOR_FUNCTION'",
                                 getLogIdentifier(), ex.getCause());
-
                     } finally {
                         requestChannelRefresh();
-
                     }
-
                     break;
 
                 // They are all readonly in the channel config.
@@ -563,74 +548,59 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
         ThingStatusDetail thingStatusDetailed = ThingStatusDetail.NONE;
         String thingStatusDescription = "";
 
-        ThingStatus curThingStatus = this.getThing().getStatus();
-
-        boolean connectionStatus = false;
-
         // Is connected to ZoneMinder and thing is ONLINE
-        if (isConnected() && curThingStatus == ThingStatus.ONLINE) {
+        if (isConnected() && getThing().getStatus() == ThingStatus.ONLINE) {
             return;
         }
 
         try {
-            String msg;
-            Bridge b = getBridge();
+            Bridge bridge = getBridge();
 
             // 1. Is there a Bridge assigned?
-            if (getBridge() == null) {
-                msg = String.format("No Bridge assigned to monitor '%s'", thing.getUID());
-                logger.error("{}: context='updateAvailabilityStatus' {}", getLogIdentifier(), msg);
+            if (bridge == null) {
                 newThingStatus = ThingStatus.OFFLINE;
                 thingStatusDetailed = ThingStatusDetail.BRIDGE_OFFLINE;
-                thingStatusDescription = "No Bridge assigned to monitor";
+                thingStatusDescription = String.format("No Bridge assigned to monitor '%s'", thing.getUID());
+                logger.error("{}: context='updateAvailabilityStatus' {}", getLogIdentifier(), thingStatusDescription);
                 return;
             } else {
-                logger.debug(
-                        "{}: context='updateAvailabilityStatus' ThingAvailability: Thing '{}' has Bridge '{}' defined (Check PASSED)",
-                        getLogIdentifier(), thing.getUID(), getBridge().getBridgeUID());
+                logger.debug("{}: context='updateAvailabilityStatus' Thing '{}' has Bridge '{}' (PASSED)",
+                        getLogIdentifier(), thing.getUID(), bridge.getThingTypeUID());
             }
 
             // 2. Is Bridge Online?
-            if (getBridge().getStatus() != ThingStatus.ONLINE) {
-                msg = String.format("Bridge '%s' is OFFLINE", getBridge().getBridgeUID());
+            if (bridge.getStatus() != ThingStatus.ONLINE) {
                 newThingStatus = ThingStatus.OFFLINE;
                 thingStatusDetailed = ThingStatusDetail.BRIDGE_OFFLINE;
-                thingStatusDescription = msg;
-                logger.error("{}: context='updateAvailabilityStatus' {}", getLogIdentifier(), msg);
+                thingStatusDescription = String.format("Bridge '%s' is OFFLINE", bridge.getBridgeUID());
+                logger.error("{}: context='updateAvailabilityStatus' {}", getLogIdentifier(), thingStatusDescription);
                 return;
             } else {
-                logger.debug(
-                        "{}: context='updateAvailabilityStatus' ThingAvailability: Bridge '{}' is ONLINE (Check PASSED)",
-                        getLogIdentifier(), getBridge().getBridgeUID());
+                logger.debug("{}: context='updateAvailabilityStatus' Bridge '{}' is ONLINE (PASSED)",
+                        getLogIdentifier(), bridge.getThingTypeUID());
             }
 
             // 3. Is Configuration OK?
             if (getMonitorConfig() == null) {
-                msg = String.format("No valid configuration found for '%s'", thing.getUID());
                 newThingStatus = ThingStatus.OFFLINE;
                 thingStatusDetailed = ThingStatusDetail.CONFIGURATION_ERROR;
-                thingStatusDescription = msg;
-
-                logger.error("{}: context='updateAvailabilityStatus' {}", getLogIdentifier(), msg);
+                thingStatusDescription = String.format("No valid configuration found for '%s'", thing.getUID());
+                logger.error("{}: context='updateAvailabilityStatus' {}", getLogIdentifier(), thingStatusDescription);
                 return;
             } else {
-                logger.debug(
-                        "{}: context='updateAvailabilityStatus' ThingAvailability: Thing '{}' has valid configuration (Check PASSED)",
+                logger.debug("{}: context='updateAvailabilityStatus' Thing '{}' has valid configuration (PASSED)",
                         getLogIdentifier(), thing.getUID());
             }
 
             // ZoneMinder Id for Monitor not set, we are pretty much lost then
             if (getMonitorConfig().getZoneMinderId().isEmpty()) {
-                msg = String.format("No Id is specified for monitor '%s'", thing.getUID());
                 newThingStatus = ThingStatus.OFFLINE;
                 thingStatusDetailed = ThingStatusDetail.CONFIGURATION_ERROR;
-                thingStatusDescription = msg;
-
-                logger.error("{}: {}", getLogIdentifier(), msg);
+                thingStatusDescription = String.format("No Id is specified for monitor '%s'", thing.getUID());
+                logger.error("{}: {}", getLogIdentifier(), thingStatusDescription);
                 return;
             } else {
-                logger.debug(
-                        "{}: context='updateAvailabilityStatus' ThingAvailability: ZoneMinder Id for Thing '{}' defined (Check PASSED)",
+                logger.debug("{}: context='updateAvailabilityStatus' ZoneMinder Id for Thing '{}' defined (PASSED)",
                         getLogIdentifier(), thing.getUID());
             }
 
@@ -640,40 +610,34 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             IZoneMinderConnectionHandler curSession = connection;
             if (curSession != null) {
                 monitorProxy = ZoneMinderFactory.getMonitorProxy(curSession, getZoneMinderId());
-
                 captureDaemon = monitorProxy.getCaptureDaemonStatus();
                 logger.debug("{}: URL='{}' ResponseCode='{}' ResponseMessage='{}'", getLogIdentifier(),
                         captureDaemon.getHttpRequestUrl(), captureDaemon.getHttpStatus(),
                         captureDaemon.getHttpResponseMessage());
-
             }
 
             if (captureDaemon == null) {
-                msg = String.format("Capture Daemon not accssible");
                 newThingStatus = ThingStatus.OFFLINE;
                 thingStatusDetailed = ThingStatusDetail.COMMUNICATION_ERROR;
-                thingStatusDescription = msg;
-                logger.error("{}: {}", getLogIdentifier(), msg);
+                thingStatusDescription = "Capture Daemon not accssible";
+                logger.error("{}: {}", getLogIdentifier(), thingStatusDescription);
                 return;
             } else if (!captureDaemon.getStatus()) {
-                msg = String.format("Capture Daemon is not running");
                 newThingStatus = ThingStatus.OFFLINE;
                 thingStatusDetailed = ThingStatusDetail.COMMUNICATION_ERROR;
-                thingStatusDescription = msg;
-                logger.error("{}: {}", getLogIdentifier(), msg);
+                thingStatusDescription = "Capture Daemon is not running";
+                logger.error("{}: {}", getLogIdentifier(), thingStatusDescription);
                 return;
             }
             newThingStatus = ThingStatus.ONLINE;
             forcedPriority = RefreshPriority.PRIORITY_BATCH;
-        } catch (ZoneMinderException | Exception exception) {
+        } catch (ZoneMinderException | Exception e) {
             newThingStatus = ThingStatus.OFFLINE;
             thingStatusDetailed = ThingStatusDetail.COMMUNICATION_ERROR;
             thingStatusDescription = "Error occurred (Check log)";
             updateThingStatus(newThingStatus, thingStatusDetailed, thingStatusDescription);
-
             logger.error("{}: context='updateAvailabilityStatus' Exception occurred '{}'", getLogIdentifier(),
-                    exception.getMessage());
-
+                    e.getMessage(), e);
             return;
         } finally {
             updateThingStatus(newThingStatus, thingStatusDetailed, thingStatusDescription);
@@ -812,9 +776,7 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
 
     @Override
     protected void onFetchData(RefreshPriority cyclePriority) {
-        IZoneMinderConnectionHandler session = null;
-        IMonitorDataGeneral data = null;
-
+        // IMonitorDataGeneral data = null;
         boolean refreshChannels = false;
 
         if (getThing().getStatus() != ThingStatus.ONLINE) {
@@ -834,32 +796,26 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             forcedPriority = RefreshPriority.DISABLED;
         }
 
-        session = null;
+        IZoneMinderConnectionHandler session = null;
         try {
             session = aquireSession();
             if (session == null) {
-                logger.warn("{}: Failed to aquire session for refresh, refresh loop for monitor will be skipped.",
-                        getLogIdentifier());
+                logger.warn("{}: Failed to aquire session, refresh for monitor will be skipped.", getLogIdentifier());
                 return;
             }
-
         } catch (Exception ex) {
-            logger.error("{}: Exception occurred when aquiring exception. Refresh loop for monitor will be skipped.",
-                    getLogIdentifier(), ex.getCause());
+            logger.error("{}: Exception when aquiring session. Refresh for monitor will be skipped.",
+                    getLogIdentifier(), ex.getMessage(), ex);
             return;
         }
 
         IZoneMinderMonitor monitorProxy = ZoneMinderFactory.getMonitorProxy(session, getZoneMinderId());
         dataConverter.disableRefresh();
-        /**************************
-         *
-         * Perform refresh of monitor data
-         **************************/
 
+        // Perform refresh of monitor data
         if (refreshGeneralData()) {
             refreshChannels = true;
             fetchMonitorGeneralData(monitorProxy);
-
             fetchMonitorDaemonStatus(true, true, monitorProxy);
         }
 
@@ -890,12 +846,9 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             }
         } else {
             dataConverter.setMonitorStillImage(null);
-
         }
 
-        if (curRefreshPriority.isPriorityActive(RefreshPriority.PRIORITY_LOW))
-
-        {
+        if (curRefreshPriority.isPriorityActive(RefreshPriority.PRIORITY_LOW)) {
             try {
                 if (dataConverter != null) {
                     String str = monitorProxy.getMonitorStreamingPath(config.getImageScale(), 1000, null);
@@ -922,13 +875,11 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             }
         }
 
-        if (session != null) {
-            releaseSession();
-            session = null;
-        }
+        releaseSession();
         dataConverter.enableRefresh();
+
         if (refreshChannels) {
-            logger.debug("{}: context='onFetchData' - Data has changed, channels need refreshing", getLogIdentifier());
+            logger.debug("{}: context='onFetchData' Data has changed, channels need refreshing", getLogIdentifier());
             requestChannelRefresh();
         }
         tryStopAlarmRefresh();
@@ -1101,7 +1052,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                             "{}: context='fetchMonitorDaemonStatus' error in call to 'getFrameDaemonStatus' - Response='{}', Exception='{}'",
                             getLogIdentifier(), zmid.getResponseString(), zmid.getClass().getCanonicalName(),
                             zmid.getCause());
-
                 } catch (ZoneMinderGeneralException | ZoneMinderAuthenticationException zme) {
                     logger.error(
                             "{}: context='fetchMonitorDaemonStatus' error in call to 'getFrameDaemonStatus' - Exception='{}'",
@@ -1114,7 +1064,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                     dataConverter.setMonitorFrameDaemonStatus(stateFrame);
                 }
             }
-
         } finally {
             if (doRelase) {
                 releaseSession();
@@ -1162,16 +1111,14 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
         if (monitorData != null) {
             properties.put(ZoneMinderProperties.PROPERTY_ID, getLogIdentifier());
             properties.put(ZoneMinderProperties.PROPERTY_NAME, monitorData.getName());
-
             properties.put(ZoneMinderProperties.PROPERTY_MONITOR_SOURCETYPE, monitorData.getSourceType().name());
-
             properties.put(ZoneMinderProperties.PROPERTY_MONITOR_ANALYSIS_FPS, monitorData.getAnalysisFPS());
             properties.put(ZoneMinderProperties.PROPERTY_MONITOR_MAXIMUM_FPS, monitorData.getMaxFPS());
             properties.put(ZoneMinderProperties.PROPERTY_MONITOR_ALARM_MAXIMUM, monitorData.getAlarmMaxFPS());
-
             properties.put(ZoneMinderProperties.PROPERTY_MONITOR_IMAGE_WIDTH, monitorData.getWidth());
             properties.put(ZoneMinderProperties.PROPERTY_MONITOR_IMAGE_HEIGHT, monitorData.getHeight());
         }
+
         // Must loop over the new properties since we might have added data
         boolean update = false;
         Map<String, String> originalProperties = editProperties();
@@ -1218,5 +1165,4 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
     @Override
     public void onRefreshEnabled() {
     }
-
 }
