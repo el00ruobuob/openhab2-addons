@@ -15,9 +15,11 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
+import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.zoneminder.ZoneMinderConstants;
 import org.openhab.binding.zoneminder.handler.ZoneMinderServerBridgeHandler;
 import org.openhab.binding.zoneminder.handler.ZoneMinderThingMonitorHandler;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,7 @@ import com.google.common.collect.Sets;
  * @author Martin S. Eskildsen - Initial contribution
  *
  */
+@Component(service = ThingHandlerFactory.class, configurationPid = "binding.zoneminder")
 public class ZoneMinderHandlerFactory extends BaseThingHandlerFactory {
 
     private Logger logger = LoggerFactory.getLogger(ZoneMinderHandlerFactory.class);
