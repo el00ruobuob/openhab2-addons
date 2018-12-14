@@ -115,7 +115,7 @@ public class ZoneMinderDiscoveryService extends AbstractDiscoveryService impleme
             }
 
             if (curDiscoveryResult != null) {
-                logger.info("[DISCOVERY]: Monitor with Id='{}' and Name='{}' added to Inbox with ThingUID='{}'",
+                logger.debug("[DISCOVERY]: Monitor with Id='{}' and Name='{}' added to Inbox with ThingUID='{}'",
                         monitorData.getId(), monitorData.getName(), thingUID);
                 thingDiscovered(curDiscoveryResult);
             }

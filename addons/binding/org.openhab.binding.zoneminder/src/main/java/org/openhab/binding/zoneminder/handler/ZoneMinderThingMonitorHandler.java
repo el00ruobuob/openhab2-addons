@@ -90,14 +90,14 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
     public ZoneMinderThingMonitorHandler(Thing thing) {
         super(thing);
 
-        logger.info("{}: Starting ZoneMinder Server Thing Handler (Thing='{}')", getLogIdentifier(), thing.getUID());
+        logger.debug("{}: Starting ZoneMinder Server Thing Handler (Thing='{}')", getLogIdentifier(), thing.getUID());
     }
 
     @Override
     public void dispose() {
         try {
             ZoneMinderServerBridgeHandler bridge = getZoneMinderBridgeHandler();
-            logger.info("{}: Unsubscribing from Monitor Events: {}", getLogIdentifier(),
+            logger.debug("{}: Unsubscribing from Monitor Events: {}", getLogIdentifier(),
                     bridge.getThing().getUID().getAsString());
             bridge.unsubscribeMonitorEvents(this);
 
@@ -123,7 +123,7 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             logger.debug("{}: Bridge '{}' connected", getLogIdentifier(), bridge.getThing().getUID().getAsString());
             super.onBridgeConnected(bridge, connection);
 
-            logger.info("{}: Add subsription for Monitor Events: {}", getLogIdentifier(),
+            logger.debug("{}: Add subsription for Monitor Events: {}", getLogIdentifier(),
                     bridge.getThing().getUID().getAsString());
             bridge.subscribeMonitorEvents(this);
 
@@ -202,10 +202,10 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             }
             super.channelLinked(channelUID);
 
-            logger.info("{}: context='channelLinked' - Unlinking from channel '{}'", getLogIdentifier(),
+            logger.debug("{}: context='channelLinked' - Unlinking from channel '{}'", getLogIdentifier(),
                     channelUID.getAsString());
         } catch (Exception ex) {
-            logger.info("{}: context='channelUnlinked' - Exception when Unlinking from channel '{}' - EXCEPTION)'{}'",
+            logger.debug("{}: context='channelUnlinked' - Exception when Unlinking from channel '{}' - EXCEPTION)'{}'",
                     getLogIdentifier(), channelUID.getAsString(), ex.getMessage());
 
         }
@@ -217,10 +217,10 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
         try {
             dataConverter.unsubscribe(channelUID);
             super.channelUnlinked(channelUID);
-            logger.info("{}: context='channelUnlinked' - Unlinking from channel '{}'", getLogIdentifier(),
+            logger.debug("{}: context='channelUnlinked' - Unlinking from channel '{}'", getLogIdentifier(),
                     channelUID.getAsString());
         } catch (Exception ex) {
-            logger.info("{}: context='channelUnlinked' - Exception when Unlinking from channel '{}' - EXCEPTION)'{}'",
+            logger.debug("{}: context='channelUnlinked' - Exception when Unlinking from channel '{}' - EXCEPTION)'{}'",
                     getLogIdentifier(), channelUID.getAsString(), ex.getMessage());
 
         }
@@ -272,7 +272,7 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                                     monitorProxy = ZoneMinderFactory.getMonitorProxy(connection, getZoneMinderId());
 
                                     if (command == OnOffType.ON) {
-                                        logger.info("{}: Activate 'ForceAlarm' to '{}' (Reason='{}', Timeout='{}')",
+                                        logger.debug("{}: Activate 'ForceAlarm' to '{}' (Reason='{}', Timeout='{}')",
                                                 getLogIdentifier(), command, eventText, eventTimeout.intValue());
 
                                         getZoneMinderBridgeHandler().activateForceAlarm(getZoneMinderId(), 255,
@@ -359,8 +359,7 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
 
                             dataConverter.setMonitorEnabled(newState);
 
-                            logger.info(
-                                    "{}: context='handleCommand' tags='enabled' - Successfully changed function setting to '{}'",
+                            logger.debug("{}: context='handleCommand' tags='enabled' - Changed function to '{}'",
                                     getLogIdentifier(), command);
                         }
                     } catch (Exception ex) {
@@ -459,7 +458,7 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             this.config = getMonitorConfig();
 
             super.initialize();
-            logger.info("{}: context='initialize' Monitor Handler Initialized", getLogIdentifier());
+            logger.debug("{}: context='initialize' Monitor Handler Initialized", getLogIdentifier());
 
             dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FORCE_ALARM));
             dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_CAUSE));
@@ -536,7 +535,7 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
 
         } catch (Exception ex) {
             logger.error("{}:  context='onTrippedForceAlarm' Exception occurred inTrippedForceAlarm() Exception='{}'",
-                    getLogIdentifier(), ex.getMessage());
+                    getLogIdentifier(), ex.getMessage(), ex);
 
         }
     }

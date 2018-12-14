@@ -206,7 +206,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
     public ZoneMinderServerBridgeHandler(Bridge bridge) {
         super(bridge);
 
-        logger.info("{}: context='constructor' Starting ZoneMinder Server Bridge Handler (Bridge='{}')",
+        logger.debug("{}: context='constructor' Starting ZoneMinder Server Bridge Handler (Bridge='{}')",
                 getLogIdentifier(), bridge.getBridgeUID());
     }
 
@@ -223,7 +223,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             updateStatus(ThingStatus.OFFLINE);
 
             ZoneMinderBridgeServerConfig config = getBridgeConfig();
-            logger.info("{}: ZoneMinder Server Bridge Handler Initialized", getLogIdentifier());
+            logger.debug("{}: ZoneMinder Server Bridge Handler Initialized", getLogIdentifier());
             logger.debug("{}:    HostName:           {}", getLogIdentifier(), config.getHost());
             logger.debug("{}:    Protocol:           {}", getLogIdentifier(), config.getProtocol());
             logger.debug("{}:    Port HTTP(S)        {}", getLogIdentifier(), config.getHttpPort());
@@ -294,7 +294,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
     public void dispose() {
         logger.debug("{}:  context='dispose' Stop polling of ZoneMinder Server API", getLogIdentifier());
 
-        logger.info("{}: context='dispose' Stopping Discovery service", getLogIdentifier());
+        logger.debug("{}: context='dispose' Stopping Discovery service", getLogIdentifier());
         // Remove the discovery service
         if (discoveryService != null) {
             discoveryService.deactivate();
@@ -306,10 +306,10 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             discoveryRegistration = null;
         }
 
-        logger.info("{}: context='dispose' Stopping WatchDog task", getLogIdentifier());
+        logger.debug("{}: context='dispose' Stopping WatchDog task", getLogIdentifier());
         stopWatchDogTask();
 
-        logger.info("{}: context='dispose' Stopping refresh data task", getLogIdentifier());
+        logger.debug("{}: context='dispose' Stopping refresh data task", getLogIdentifier());
         stopTask(taskRefreshData);
     }
 
@@ -1227,7 +1227,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         if ((curStatusInfo.getStatus() != newStatus) || (curStatusInfo.getStatusDetail() != statusDetail)
                 || (!curDescription.equals(statusDescription))) {
             if (!curStatusInfo.getStatus().equals(newStatus)) {
-                logger.info("{}: context='updateBridgeStatus' Bridge status changed from '{}' to '{}'",
+                logger.debug("{}: context='updateBridgeStatus' Bridge status changed from '{}' to '{}'",
                         getLogIdentifier(), thing.getStatus(), newStatus);
             }
 
@@ -1317,7 +1317,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
     public void subscribeMonitorEvents(ZoneMinderThingMonitorHandler monitorHandler) {
         try {
             if (zoneMinderEventSession != null) {
-                logger.info("{}: context='SubscribeMonitorEvents' thing='monitor' id='{}'", getLogIdentifier(),
+                logger.debug("{}: context='SubscribeMonitorEvents' thing='monitor' id='{}'", getLogIdentifier(),
                         monitorHandler.getZoneMinderId());
 
                 zoneMinderEventSession.subscribeMonitorEvents(zoneMinderConnection, monitorHandler.getZoneMinderId(),
@@ -1340,7 +1340,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             if (zoneMinderEventSession != null) {
                 zoneMinderEventSession.unsubscribeMonitorEvents(monitorHandler.getZoneMinderId(), monitorHandler);
 
-                logger.info("{}: context='UnsubscribeMonitorEvents' thing='monitor' id='{}'", getLogIdentifier(),
+                logger.debug("{}: context='UnsubscribeMonitorEvents' thing='monitor' id='{}'", getLogIdentifier(),
                         monitorHandler.getZoneMinderId());
 
             } else {
@@ -1499,7 +1499,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
 
     @Override
     public void onBridgeDisconnected(ZoneMinderServerBridgeHandler bridge) {
-        logger.info("{}: Brigde went OFFLINE", getLogIdentifier());
+        logger.debug("{}: Brigde went OFFLINE", getLogIdentifier());
 
         // Deactivate discovery service
         discoveryService.deactivate();
@@ -1631,7 +1631,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         }
 
         if (update) {
-            logger.info("{}: Properties synchronised, Thing id: {}", getLogIdentifier(), getThingId());
+            logger.debug("{}: Properties synchronised, Thing id: {}", getLogIdentifier(), getThingId());
             updateProperties(properties);
         }
     }
