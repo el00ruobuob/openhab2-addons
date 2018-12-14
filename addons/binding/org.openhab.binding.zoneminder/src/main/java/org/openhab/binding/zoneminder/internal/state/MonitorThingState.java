@@ -285,7 +285,9 @@ public class MonitorThingState extends GenericThingState {
         GenericChannelState gcs = getChannelStateHandler(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_CAUSE);
         if (gcs != null) {
             try {
-                if (!activeEvent.equals(eventData)) {
+                // FIXME
+                // if (!activeEvent.equals(eventData)) {
+                if (!eventData.equals(activeEvent)) {
                     activeEvent = eventData;
                     gcs.setState(eventData.getCause());
                 }
