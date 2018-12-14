@@ -57,6 +57,7 @@ When a new monitor is discovered it will appear in the Inbox.
 ### Things configuration
 
 #### Bridge Configuration
+
 | Parameter                | Optional | Description                                                                                |
 |--------------------------|----------|--------------------------------------------------------------------------------------------|
 | host                     |          | Hostname or Ip address of ZoneMinder server                                                |
@@ -76,6 +77,7 @@ When a new monitor is discovered it will appear in the Inbox.
 | streamingPassword        |    X     | If 'useSpecificUserStreaming' is true, password must be specified here                     |
 
 #### Monitor Configuration
+
 | Parameter                | Optional | Description                                                                                   |
 |--------------------------|----------|-----------------------------------------------------------------------------------------------|
 | id                       |          | Id of the monitor. Must match id in ZoneMinder                                                |
@@ -87,6 +89,7 @@ When a new monitor is discovered it will appear in the Inbox.
 
 
 ### Things file
+
 ```
 Bridge zoneminder:server:ZoneMinderSample [ host="192.168.1.55", protocol="http", user="<USERNAME>", password="<PASSWORD>", autodiscover=false, useSpecificUserStreaming=true, streamingUser="<STREAMING-USER>", streamingPassword="<STREAMING-PASSWORD>" ]
 {
