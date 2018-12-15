@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -1356,12 +1357,13 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 logger.error("{}: context='activateForceAlarm' No EventSession active for Monitor with Id='{}'",
                         getLogIdentifier(), monitorId);
             }
-
+        } catch (SocketTimeoutException e) {
+            logger.error("{}: context='activateForceAlarm' tag='exception' - activeForceAlarm failed with: {}",
+                    getLogIdentifier(), e.getMessage());
         } catch (IOException ex) {
             logger.error("{}: context='activateForceAlarm' tag='exception' - Call to activeForceAlarm failed",
                     getLogIdentifier(), ex);
         }
-
     }
 
     public void deactivateForceAlarm(String monitorId) {
@@ -1372,17 +1374,17 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 logger.error("{}: context='deactivateForceAlarm' No EventSession active for Monitor with Id='{}'",
                         getLogIdentifier(), monitorId);
             }
-
+        } catch (SocketTimeoutException e) {
+            logger.error("{}: context='deactivateForceAlarm' tag='exception' - deactivateForceAlarm failed with: {}",
+                    getLogIdentifier(), e.getMessage());
         } catch (Exception ex) {
-            logger.error("{}: context='deactivateForceAlarm' tag='exception' - Call to deactiveForceAlarm failed",
+            logger.error("{}: context='deactivateForceAlarm' tag='exception' - Call to deactivateForceAlarm failed",
                     getLogIdentifier(), ex);
         }
-
     }
 
     protected State getServerCpuLoadState() {
         State state = UnDefType.UNDEF;
-
         try {
             if ((channelCpuLoad != "") && (isConnected())) {
                 state = new DecimalType(new BigDecimal(channelCpuLoad));
@@ -1392,13 +1394,11 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             // Deliberately kept as debug info!
             logger.debug("{}: context='getServerCpuLoadState' Exception='{}'", getLogIdentifier(), ex.getMessage());
         }
-
         return state;
     }
 
     protected State getServerDiskUsageState() {
         State state = UnDefType.UNDEF;
-
         try {
             if ((channelDiskUsage != "") && (isConnected())) {
                 state = new DecimalType(new BigDecimal(channelDiskUsage));
@@ -1407,7 +1407,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             // Deliberately kept as debug info!
             logger.debug("{}: context='getServerDiskUsageState' Exception {}", getLogIdentifier(), ex.getMessage());
         }
-
         return state;
     }
 
