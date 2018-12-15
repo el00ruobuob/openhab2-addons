@@ -30,24 +30,21 @@ public class ChannelRawType extends GenericChannelState {
     }
 
     @Override
-    protected State convert(Object _state) throws UnsupportedDataTypeException {
+    protected State convert(Object state) throws UnsupportedDataTypeException {
         State newState = UnDefType.UNDEF;
 
-        State state = UnDefType.UNDEF;
-        if (_state instanceof ByteArrayOutputStream) {
+        // TODO Not used?
+        // State state = UnDefType.UNDEF;
+        if (state instanceof ByteArrayOutputStream) {
             // ByteArrayOutputStream baos = (ByteArrayOutputStream) _state;
-            newState = new RawType(((ByteArrayOutputStream) _state).toByteArray(), "image/jpeg");
-        }
-
-        else if (_state instanceof RawType) {
-            newState = (RawType) _state;
-        } else if (_state instanceof UnDefType) {
-            newState = (UnDefType) _state;
+            newState = new RawType(((ByteArrayOutputStream) state).toByteArray(), "image/jpeg");
+        } else if (state instanceof RawType) {
+            newState = (RawType) state;
+        } else if (state instanceof UnDefType) {
+            newState = (UnDefType) state;
         } else {
             throw new UnsupportedDataTypeException();
         }
         return newState;
-
     }
-
 }

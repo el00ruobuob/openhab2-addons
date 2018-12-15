@@ -30,8 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Martin S. Eskildsen - Initial contribution
  */
 public abstract class GenericThingState implements ChannelStateChangePublisher {
-
-    private Logger logger = LoggerFactory.getLogger(GenericThingState.class);
+    private final Logger logger = LoggerFactory.getLogger(GenericThingState.class);
 
     final AtomicBoolean allowRefresh = new AtomicBoolean(true);
 
@@ -123,7 +122,8 @@ public abstract class GenericThingState implements ChannelStateChangePublisher {
     public void enableRefresh() {
         if (allowRefresh.compareAndSet(false, true)) {
             for (Map.Entry<String, GenericChannelState> entry : subscriptions.entrySet()) {
-                String key = entry.getKey().toString();
+                // TODO Not used?
+                // String key = entry.getKey().toString();
                 GenericChannelState channel = entry.getValue();
                 channel.flushChanges();
             }
@@ -141,7 +141,8 @@ public abstract class GenericThingState implements ChannelStateChangePublisher {
         }
 
         for (Map.Entry<String, GenericChannelState> entry : subscriptions.entrySet()) {
-            String key = entry.getKey().toString();
+            // TODO Not used?
+            // String key = entry.getKey().toString();
             GenericChannelState channel = entry.getValue();
             channel.flushChanges(true);
         }

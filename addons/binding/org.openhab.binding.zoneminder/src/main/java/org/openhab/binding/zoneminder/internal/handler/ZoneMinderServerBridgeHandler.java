@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.openhab.binding.zoneminder.handler;
+package org.openhab.binding.zoneminder.internal.handler;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -41,10 +41,10 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
-import org.openhab.binding.zoneminder.ZoneMinderConstants;
-import org.openhab.binding.zoneminder.ZoneMinderProperties;
 import org.openhab.binding.zoneminder.internal.RefreshPriority;
 import org.openhab.binding.zoneminder.internal.ZoneMinderConnectionStatus;
+import org.openhab.binding.zoneminder.internal.ZoneMinderConstants;
+import org.openhab.binding.zoneminder.internal.ZoneMinderProperties;
 import org.openhab.binding.zoneminder.internal.config.ZoneMinderBridgeServerConfig;
 import org.openhab.binding.zoneminder.internal.discovery.ZoneMinderDiscoveryService;
 import org.osgi.framework.ServiceRegistration;

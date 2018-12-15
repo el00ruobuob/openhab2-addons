@@ -29,20 +29,18 @@ public class ChannelStringType extends GenericChannelState {
     }
 
     @Override
-    protected State convert(Object _state) throws UnsupportedDataTypeException {
+    protected State convert(Object state) throws UnsupportedDataTypeException {
         State newState = UnDefType.UNDEF;
 
-        if (_state instanceof String) {
-            newState = new StringType((String) _state);
-        } else if (_state instanceof StringType) {
-            newState = (StringType) _state;
-
-        } else if (_state instanceof UnDefType) {
-            newState = (UnDefType) _state;
+        if (state instanceof String) {
+            newState = new StringType((String) state);
+        } else if (state instanceof StringType) {
+            newState = (StringType) state;
+        } else if (state instanceof UnDefType) {
+            newState = (UnDefType) state;
         } else {
             throw new UnsupportedDataTypeException();
         }
         return newState;
     }
-
 }

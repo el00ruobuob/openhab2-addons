@@ -11,8 +11,6 @@ package org.openhab.binding.zoneminder.internal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openhab.binding.zoneminder.ZoneMinderConstants;
-
 /**
  *
  * @author Martin S. Eskildsen - Initial contribution

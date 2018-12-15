@@ -16,9 +16,8 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
-import org.openhab.binding.zoneminder.ZoneMinderConstants;
-import org.openhab.binding.zoneminder.handler.ZoneMinderServerBridgeHandler;
-import org.openhab.binding.zoneminder.handler.ZoneMinderThingMonitorHandler;
+import org.openhab.binding.zoneminder.internal.handler.ZoneMinderServerBridgeHandler;
+import org.openhab.binding.zoneminder.internal.handler.ZoneMinderThingMonitorHandler;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,20 +46,14 @@ public class ZoneMinderHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     protected ThingHandler createHandler(Thing thing) {
-
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
-
         if (thingTypeUID.equals(ZoneMinderConstants.THING_TYPE_BRIDGE_ZONEMINDER_SERVER)) {
-
             logger.debug("[FACTORY]: creating handler for bridge thing '{}'", thing);
             ZoneMinderServerBridgeHandler bridge = new ZoneMinderServerBridgeHandler((Bridge) thing);
-
             return bridge;
         } else if (thingTypeUID.equals(ZoneMinderConstants.THING_TYPE_THING_ZONEMINDER_MONITOR)) {
             return new ZoneMinderThingMonitorHandler(thing);
         }
-
         return null;
     }
-
 }

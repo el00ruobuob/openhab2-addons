@@ -19,7 +19,7 @@ import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
-import org.openhab.binding.zoneminder.ZoneMinderConstants;
+import org.openhab.binding.zoneminder.internal.ZoneMinderConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,14 +36,16 @@ import name.eskildsen.zoneminder.data.IZoneMinderEventData;
  * @author Martin S. Eskildsen - Initial contribution
  */
 public class MonitorThingState extends GenericThingState {
-
-    private Logger logger = LoggerFactory.getLogger(MonitorThingState.class);
+    private final Logger logger = LoggerFactory.getLogger(MonitorThingState.class);
 
     private boolean isDirty;
+
+    // FIXME This never gets set
     private String logIdentifier = "";
 
     private IZoneMinderEventData activeEvent = null;
-    private ZoneMinderTriggerEvent curTriggerEvent = null;
+    // TODO Not used?
+    // private ZoneMinderTriggerEvent curTriggerEvent = null;
 
     /*
      * Used in recalculate
@@ -60,6 +62,10 @@ public class MonitorThingState extends GenericThingState {
 
     boolean bRecalculating = false;
 
+    public MonitorThingState(ChannelStateChangeSubscriber subscriber) {
+        super(subscriber);
+    }
+
     /*
      * public MonitorThingState(String id, ChannelStateChangeSubscriber subscriber) {
      * super(subscriber);
@@ -69,11 +75,6 @@ public class MonitorThingState extends GenericThingState {
      */
     protected void initialize() {
         isDirty = true;
-    }
-
-    public MonitorThingState(ChannelStateChangeSubscriber subscriber) {
-        super(subscriber);
-
     }
 
     @Override
@@ -94,7 +95,6 @@ public class MonitorThingState extends GenericThingState {
                     channelState = createSubscriptionOnOffType(channelUID);
                     break;
             }
-
         } catch (Exception ex) {
             logger.error("{}: context='subscribe' - Exception occurred when subscribing to channel '{}'", "<UNKNOWN>",
                     channelUID.getId());
@@ -109,7 +109,6 @@ public class MonitorThingState extends GenericThingState {
     public boolean isAlarmed() {
         State stateEnabled = getChannelStateHandler(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_STATE).getState();
         return ((alarmedDetailedState.get() || (stateEnabled == OnOffType.ON)) ? true : false);
-
     }
 
     private boolean isEnabled() {
@@ -131,9 +130,9 @@ public class MonitorThingState extends GenericThingState {
     }
 
     public boolean getMonitorEventMotion() {
+        // FIXME When should it return true
         State stateEventMotion = getChannelStateHandler(ZoneMinderConstants.CHANNEL_MONITOR_MOTION_EVENT).getState();
         return false;
-
     }
 
     public ZoneMinderMonitorStatusEnum getMonitorDetailedStatus() {
@@ -147,17 +146,16 @@ public class MonitorThingState extends GenericThingState {
         try {
             result = ZoneMinderMonitorStatusEnum.getEnumFromName(stateStatus.toString());
         } catch (Exception ex) {
-            logger.error(
-                    "{}: context='getMonitorDetailedStatus' Exception occurred when calling getMonitorDetailedStatus",
+            logger.error("{}: context='getMonitorDetailedStatus' Exception calling getMonitorDetailedStatus",
                     logIdentifier, ex);
-
         }
         return result;
     }
 
     public void setMonitorTriggerEvent(ZoneMinderTriggerEvent event) {
         isDirty = true;
-        curTriggerEvent = event;
+        // TODO Not used?
+        // curTriggerEvent = event;
     }
 
     public void setMonitorFunction(ZoneMinderMonitorFunctionEnum monitorFunction) {
@@ -178,18 +176,14 @@ public class MonitorThingState extends GenericThingState {
             try {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
-                logger.error(
-                        "{}: context='setMonitorEventCause' Exception occurred when updating capture-daemon channel",
+                logger.error("{}: context='setMonitorEventCause' Exception updating capture-daemon channel",
                         logIdentifier, e);
-
             }
         }
-
     }
 
     public void setMonitorEventMotion(State state) {
         GenericChannelState gcs = getChannelStateHandler(ZoneMinderConstants.CHANNEL_MONITOR_MOTION_EVENT);
-
         if (gcs != null) {
             try {
                 gcs.setState(state);
@@ -198,7 +192,6 @@ public class MonitorThingState extends GenericThingState {
                         logIdentifier, e);
             }
         }
-
     }
 
     public void setMonitorGeneralData(IMonitorDataGeneral monitorData) {
@@ -210,7 +203,6 @@ public class MonitorThingState extends GenericThingState {
 
     public void setMonitorEnabled(boolean state) {
         GenericChannelState gcs = getChannelStateHandler(ZoneMinderConstants.CHANNEL_MONITOR_ENABLED);
-
         try {
             if (gcs != null) {
                 gcs.setState(state);
@@ -224,7 +216,6 @@ public class MonitorThingState extends GenericThingState {
                     "{}: context='setMonitorEnabled' tag='exception' Exception occurredwhen calling setMonitorEnabled",
                     logIdentifier, ex);
         }
-
     }
 
     public void setMonitorRecording(boolean state) {
@@ -236,7 +227,6 @@ public class MonitorThingState extends GenericThingState {
                 logger.error("{}: context='setMonitorRecortding' Exception occurred", logIdentifier, e);
             }
         }
-
     }
 
     public void setMonitorEventState(boolean state) {
@@ -260,7 +250,6 @@ public class MonitorThingState extends GenericThingState {
 
             }
         }
-
     }
 
     public void setMonitorForceAlarmExternal(boolean state) {
@@ -273,7 +262,6 @@ public class MonitorThingState extends GenericThingState {
 
             }
         }
-
     }
 
     public void setMonitorEventData(IZoneMinderEventData eventData) {
@@ -329,7 +317,6 @@ public class MonitorThingState extends GenericThingState {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
                 logger.error("{}: context='setMonitorAnalysisDaemonStatus' Exception occurred", logIdentifier, e);
-
             }
         }
     }
@@ -341,7 +328,6 @@ public class MonitorThingState extends GenericThingState {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
                 logger.error("{}: context='setMonitorFrameDaemonStatus' Exception occurred", logIdentifier, e);
-
             }
         }
     }
@@ -361,10 +347,8 @@ public class MonitorThingState extends GenericThingState {
                 }
             } catch (UnsupportedDataTypeException e) {
                 logger.error("{}: context='setMonitorStillImage' Exception occurred", logIdentifier, e);
-
             }
         }
-
     }
 
     public void setMonitorVideoUrl(String url) {
@@ -385,7 +369,6 @@ public class MonitorThingState extends GenericThingState {
                 recalculate();
                 break;
         }
-
     }
 
     @Override
@@ -421,8 +404,7 @@ public class MonitorThingState extends GenericThingState {
                 default:
                     recordingFunction.set((activeEvent != null) ? true : false);
             }
-            logger.debug(
-                    "{}: Recalculate channel states based on Function: Function='{}' -> alarmState='{}', recordingState='{}'",
+            logger.debug("{}: Recalculate channel state: Function='{}' -> alarmState='{}', recordingState='{}'",
                     logIdentifier, monitorFunction, alarmedFunction, recordingFunction);
 
             // Calculated based on detailed Monitor Status
@@ -450,8 +432,7 @@ public class MonitorThingState extends GenericThingState {
                     break;
 
             }
-            logger.debug(
-                    "{}: Recalculate channel states based on Detailed State: DetailedState='{}' -> alarmState='{}', recordingState='{}'",
+            logger.debug("{}: Recalculate channel state: DetailedState='{}' -> alarmState='{}', recordingState='{}'",
                     logIdentifier, monitorStatus.name(), alarmedDetailedState, recordingDetailedState);
 
             if (monitorStatus == ZoneMinderMonitorStatusEnum.IDLE && !alarmedDetailedState.get()
@@ -503,11 +484,9 @@ public class MonitorThingState extends GenericThingState {
             if (image != null) {
                 state = new RawType(image.toByteArray(), "image/jpeg");
             }
-
         } catch (Exception ex) {
             logger.error("{}: Exception occurred in 'getChannelByteArrayAsRawType()'", logIdentifier, ex);
         }
-
         return state;
     }
 

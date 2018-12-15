@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.openhab.binding.zoneminder.handler;
+package org.openhab.binding.zoneminder.internal.handler;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;

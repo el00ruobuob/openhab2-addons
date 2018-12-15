@@ -31,27 +31,27 @@ public class ChannelOnOffType extends GenericChannelState {
     }
 
     @Override
-    protected State convert(Object _state) throws UnsupportedDataTypeException {
+    protected State convert(Object state) throws UnsupportedDataTypeException {
         State newState = UnDefType.UNDEF;
-        if (_state instanceof String) {
-            String value = (String) _state;
-            if (((String) _state).equalsIgnoreCase("ON")) {
+        if (state instanceof String) {
+            // TODO Not used?
+            // String value = (String) _state;
+            if (((String) state).equalsIgnoreCase("ON")) {
                 newState = OnOffType.ON;
-            } else if (((String) _state).equalsIgnoreCase("OFF")) {
+            } else if (((String) state).equalsIgnoreCase("OFF")) {
                 newState = OnOffType.OFF;
             } else {
                 throw new UnsupportedDataTypeException();
             }
-        } else if (_state instanceof Boolean) {
-            newState = ((Boolean) _state) ? OnOffType.ON : OnOffType.OFF;
-        } else if (_state instanceof OnOffType) {
-            newState = (OnOffType) _state;
-        } else if (_state instanceof UnDefType) {
-            newState = (UnDefType) _state;
+        } else if (state instanceof Boolean) {
+            newState = ((Boolean) state) ? OnOffType.ON : OnOffType.OFF;
+        } else if (state instanceof OnOffType) {
+            newState = (OnOffType) state;
+        } else if (state instanceof UnDefType) {
+            newState = (UnDefType) state;
         } else {
             throw new UnsupportedDataTypeException();
         }
         return newState;
     }
-
 }

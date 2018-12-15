@@ -49,7 +49,6 @@ public abstract class GenericChannelState implements ChannelState {
         if (countSubscription > 0) {
             countSubscription--;
         }
-
     }
 
     @Override
@@ -72,10 +71,8 @@ public abstract class GenericChannelState implements ChannelState {
             state = newState;
             // Set Dirty flag
             setDirtyFlag();
-
             thing.onChannelChanged(channelUID);
         }
-
         if (update && changed) {
             // Try to udpate
             flushChanges();
@@ -90,7 +87,6 @@ public abstract class GenericChannelState implements ChannelState {
         if (!isDirty.get() && !force) {
             return;
         }
-
         if (thing.allowRefresh() || force) {
             subscriber.onStateChanged(channelUID, state);
             // Clear dirtyflag
@@ -107,5 +103,4 @@ public abstract class GenericChannelState implements ChannelState {
     }
 
     protected abstract State convert(Object state) throws UnsupportedDataTypeException;
-
 }
