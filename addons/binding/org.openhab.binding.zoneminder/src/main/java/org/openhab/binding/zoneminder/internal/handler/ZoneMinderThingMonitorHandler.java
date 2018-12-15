@@ -1112,7 +1112,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             if (config != null) {
                 result = String.format("[MONITOR-%s]", config.getZoneMinderId().toString());
             }
-
         } catch (Exception ex) {
             result = "[MONITOR]";
         }

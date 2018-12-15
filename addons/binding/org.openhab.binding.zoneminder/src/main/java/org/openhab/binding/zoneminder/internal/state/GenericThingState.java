@@ -20,6 +20,7 @@ import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.binding.zoneminder.internal.handler.ZoneMinderThingMonitorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +35,13 @@ public abstract class GenericThingState implements ChannelStateChangePublisher {
 
     final AtomicBoolean allowRefresh = new AtomicBoolean(true);
 
-    private ChannelStateChangeSubscriber subscriber = null;
+    private ZoneMinderThingMonitorHandler handler;
 
     // Keeps track of current channel refresh status of subscribed channels
     private Map<String, GenericChannelState> subscriptions = new ConcurrentHashMap<String, GenericChannelState>();
 
-    public GenericThingState(ChannelStateChangeSubscriber subscriber) {
-        this.subscriber = subscriber;
+    public GenericThingState(ZoneMinderThingMonitorHandler handler) {
+        this.handler = handler;
     }
 
     protected abstract void recalculate();
@@ -63,12 +64,12 @@ public abstract class GenericThingState implements ChannelStateChangePublisher {
     }
 
     protected GenericChannelState createSubscriptionStringType(ChannelUID channelUID) {
-        return new ChannelStringType(channelUID, this, subscriber);
+        return new ChannelStringType(channelUID, this, handler);
 
     }
 
     protected GenericChannelState createSubscriptionOnOffType(ChannelUID channelUID) {
-        return new ChannelOnOffType(channelUID, this, subscriber);
+        return new ChannelOnOffType(channelUID, this, handler);
     }
 
     protected GenericChannelState getChannelStateHandler(String channelId) {
@@ -82,7 +83,7 @@ public abstract class GenericThingState implements ChannelStateChangePublisher {
     }
 
     protected GenericChannelState createSubscriptionRawType(ChannelUID channelUID) {
-        return new ChannelRawType(channelUID, this, subscriber);
+        return new ChannelRawType(channelUID, this, handler);
     }
 
     @Override

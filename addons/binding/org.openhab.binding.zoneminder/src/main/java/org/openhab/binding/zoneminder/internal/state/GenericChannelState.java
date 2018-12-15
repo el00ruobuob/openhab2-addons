@@ -15,6 +15,7 @@ import javax.activation.UnsupportedDataTypeException;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.binding.zoneminder.internal.handler.ZoneMinderThingMonitorHandler;
 
 /**
  * The {@link GenericThingState} is responsible for handling commands, which are
@@ -28,15 +29,15 @@ public abstract class GenericChannelState implements ChannelState {
 
     private ChannelUID channelUID;
     private GenericThingState thing = null;
-    private ChannelStateChangeSubscriber subscriber = null;
+    private ZoneMinderThingMonitorHandler handler;
     private State state = UnDefType.NULL;
     private int countSubscription = 0;
 
     protected GenericChannelState(ChannelUID channelUID, GenericThingState thing,
-            ChannelStateChangeSubscriber subscriber) {
+            ZoneMinderThingMonitorHandler handler) {
         this.channelUID = channelUID;
         this.thing = thing;
-        this.subscriber = subscriber;
+        this.handler = handler;
     }
 
     @Override
@@ -88,7 +89,7 @@ public abstract class GenericChannelState implements ChannelState {
             return;
         }
         if (thing.allowRefresh() || force) {
-            subscriber.onStateChanged(channelUID, state);
+            handler.onStateChanged(channelUID, state);
             // Clear dirtyflag
             clearDirtyFlag();
         }

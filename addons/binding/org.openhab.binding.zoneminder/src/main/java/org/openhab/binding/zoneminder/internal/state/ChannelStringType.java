@@ -14,6 +14,7 @@ import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.binding.zoneminder.internal.handler.ZoneMinderThingMonitorHandler;
 
 /**
  * The {@link GenericThingState} is responsible for handling commands, which are
@@ -23,21 +24,19 @@ import org.eclipse.smarthome.core.types.UnDefType;
  */
 public class ChannelStringType extends GenericChannelState {
 
-    protected ChannelStringType(ChannelUID channelUID, GenericThingState thing,
-            ChannelStateChangeSubscriber subscriber) {
-        super(channelUID, thing, subscriber);
+    protected ChannelStringType(ChannelUID channelUID, GenericThingState thing, ZoneMinderThingMonitorHandler handler) {
+        super(channelUID, thing, handler);
     }
 
     @Override
     protected State convert(Object state) throws UnsupportedDataTypeException {
-        State newState = UnDefType.UNDEF;
-
+        State newState;
         if (state instanceof String) {
             newState = new StringType((String) state);
         } else if (state instanceof StringType) {
             newState = (StringType) state;
         } else if (state instanceof UnDefType) {
-            newState = (UnDefType) state;
+            newState = UnDefType.UNDEF;
         } else {
             throw new UnsupportedDataTypeException();
         }

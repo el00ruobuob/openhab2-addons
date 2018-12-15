@@ -16,6 +16,7 @@ import org.eclipse.smarthome.core.library.types.RawType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.binding.zoneminder.internal.handler.ZoneMinderThingMonitorHandler;
 
 /**
  * The {@link ChannelRawType} is responsible for handling commands, which are
@@ -25,23 +26,21 @@ import org.eclipse.smarthome.core.types.UnDefType;
  */
 public class ChannelRawType extends GenericChannelState {
 
-    protected ChannelRawType(ChannelUID channelUID, GenericThingState thing, ChannelStateChangeSubscriber subscriber) {
-        super(channelUID, thing, subscriber);
+    protected ChannelRawType(ChannelUID channelUID, GenericThingState thing, ZoneMinderThingMonitorHandler handler) {
+        super(channelUID, thing, handler);
     }
 
     @Override
     protected State convert(Object state) throws UnsupportedDataTypeException {
-        State newState = UnDefType.UNDEF;
-
-        // TODO Not used?
-        // State state = UnDefType.UNDEF;
+        State newState;
         if (state instanceof ByteArrayOutputStream) {
+            // FIXME What is this for?
             // ByteArrayOutputStream baos = (ByteArrayOutputStream) _state;
             newState = new RawType(((ByteArrayOutputStream) state).toByteArray(), "image/jpeg");
         } else if (state instanceof RawType) {
             newState = (RawType) state;
         } else if (state instanceof UnDefType) {
-            newState = (UnDefType) state;
+            newState = UnDefType.UNDEF;
         } else {
             throw new UnsupportedDataTypeException();
         }

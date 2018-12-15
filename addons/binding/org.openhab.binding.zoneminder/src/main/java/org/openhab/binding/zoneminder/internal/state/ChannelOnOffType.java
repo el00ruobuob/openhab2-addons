@@ -15,6 +15,7 @@ import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
+import org.openhab.binding.zoneminder.internal.handler.ZoneMinderThingMonitorHandler;
 
 /**
  * The {@link ChannelOnOffType} is responsible for handling commands, which are
@@ -25,17 +26,14 @@ import org.eclipse.smarthome.core.types.UnDefType;
 
 public class ChannelOnOffType extends GenericChannelState {
 
-    protected ChannelOnOffType(ChannelUID channelUID, GenericThingState thing,
-            ChannelStateChangeSubscriber subscriber) {
-        super(channelUID, thing, subscriber);
+    protected ChannelOnOffType(ChannelUID channelUID, GenericThingState thing, ZoneMinderThingMonitorHandler handler) {
+        super(channelUID, thing, handler);
     }
 
     @Override
     protected State convert(Object state) throws UnsupportedDataTypeException {
-        State newState = UnDefType.UNDEF;
+        State newState;
         if (state instanceof String) {
-            // TODO Not used?
-            // String value = (String) _state;
             if (((String) state).equalsIgnoreCase("ON")) {
                 newState = OnOffType.ON;
             } else if (((String) state).equalsIgnoreCase("OFF")) {
@@ -48,7 +46,7 @@ public class ChannelOnOffType extends GenericChannelState {
         } else if (state instanceof OnOffType) {
             newState = (OnOffType) state;
         } else if (state instanceof UnDefType) {
-            newState = (UnDefType) state;
+            newState = UnDefType.UNDEF;
         } else {
             throw new UnsupportedDataTypeException();
         }

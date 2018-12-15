@@ -20,6 +20,7 @@ import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.zoneminder.internal.ZoneMinderConstants;
+import org.openhab.binding.zoneminder.internal.handler.ZoneMinderThingMonitorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +41,7 @@ public class MonitorThingState extends GenericThingState {
 
     private boolean isDirty;
 
-    // FIXME This never gets set
-    private String logIdentifier = "";
+    private ZoneMinderThingMonitorHandler handler;
 
     private IZoneMinderEventData activeEvent = null;
     // TODO Not used?
@@ -62,8 +62,9 @@ public class MonitorThingState extends GenericThingState {
 
     boolean bRecalculating = false;
 
-    public MonitorThingState(ChannelStateChangeSubscriber subscriber) {
-        super(subscriber);
+    public MonitorThingState(ZoneMinderThingMonitorHandler handler) {
+        super(handler);
+        this.handler = handler;
     }
 
     /*
@@ -73,6 +74,7 @@ public class MonitorThingState extends GenericThingState {
      * initialize();
      * }
      */
+    // FIXME This is not called from anywhere
     protected void initialize() {
         isDirty = true;
     }
@@ -147,7 +149,7 @@ public class MonitorThingState extends GenericThingState {
             result = ZoneMinderMonitorStatusEnum.getEnumFromName(stateStatus.toString());
         } catch (Exception ex) {
             logger.error("{}: context='getMonitorDetailedStatus' Exception calling getMonitorDetailedStatus",
-                    logIdentifier, ex);
+                    handler.getLogIdentifier(), ex);
         }
         return result;
     }
@@ -165,7 +167,7 @@ public class MonitorThingState extends GenericThingState {
                 gcs.setState(monitorFunction.toString());
             } catch (UnsupportedDataTypeException e) {
                 logger.error("{}: context='setMonitorFunction' Exception occurred when updating capture-daemon channel",
-                        logIdentifier, e);
+                        handler.getLogIdentifier(), e);
             }
         }
     }
@@ -177,7 +179,7 @@ public class MonitorThingState extends GenericThingState {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
                 logger.error("{}: context='setMonitorEventCause' Exception updating capture-daemon channel",
-                        logIdentifier, e);
+                        handler.getLogIdentifier(), e);
             }
         }
     }
@@ -189,7 +191,7 @@ public class MonitorThingState extends GenericThingState {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
                 logger.error("{}: context='setMonitorEnabled' Exception occurred when updating capture-daemon channel",
-                        logIdentifier, e);
+                        handler.getLogIdentifier(), e);
             }
         }
     }
@@ -209,12 +211,12 @@ public class MonitorThingState extends GenericThingState {
             }
         } catch (UnsupportedDataTypeException e) {
             logger.error("{}: context='setMonitorEnabled' Exception occurred when calling setMonitorEnabled",
-                    logIdentifier, e);
+                    handler.getLogIdentifier(), e);
 
         } catch (Exception ex) {
             logger.error(
                     "{}: context='setMonitorEnabled' tag='exception' Exception occurredwhen calling setMonitorEnabled",
-                    logIdentifier, ex);
+                    handler.getLogIdentifier(), ex);
         }
     }
 
@@ -224,7 +226,7 @@ public class MonitorThingState extends GenericThingState {
             try {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorRecortding' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorRecortding' Exception occurred", handler.getLogIdentifier(), e);
             }
         }
     }
@@ -235,7 +237,7 @@ public class MonitorThingState extends GenericThingState {
             try {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorEventState' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorEventState' Exception occurred", handler.getLogIdentifier(), e);
             }
         }
     }
@@ -246,7 +248,8 @@ public class MonitorThingState extends GenericThingState {
             try {
                 gcs.setState(state, true);
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorForceAlarmInternal' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorForceAlarmInternal' Exception occurred",
+                        handler.getLogIdentifier(), e);
 
             }
         }
@@ -258,7 +261,8 @@ public class MonitorThingState extends GenericThingState {
             try {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorForceAlarmExternal' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorForceAlarmExternal' Exception occurred",
+                        handler.getLogIdentifier(), e);
 
             }
         }
@@ -280,7 +284,7 @@ public class MonitorThingState extends GenericThingState {
                     gcs.setState(eventData.getCause());
                 }
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorEventData' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorEventData' Exception occurred", handler.getLogIdentifier(), e);
             }
         }
     }
@@ -292,7 +296,8 @@ public class MonitorThingState extends GenericThingState {
                 gcs.setState(status.toString());
 
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorDetailedStatus' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorDetailedStatus' Exception occurred", handler.getLogIdentifier(),
+                        e);
 
             }
         }
@@ -304,7 +309,7 @@ public class MonitorThingState extends GenericThingState {
             try {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorStillImage' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorStillImage' Exception occurred", handler.getLogIdentifier(), e);
 
             }
         }
@@ -316,7 +321,8 @@ public class MonitorThingState extends GenericThingState {
             try {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorAnalysisDaemonStatus' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorAnalysisDaemonStatus' Exception occurred",
+                        handler.getLogIdentifier(), e);
             }
         }
     }
@@ -327,7 +333,8 @@ public class MonitorThingState extends GenericThingState {
             try {
                 gcs.setState(state);
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorFrameDaemonStatus' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorFrameDaemonStatus' Exception occurred", handler.getLogIdentifier(),
+                        e);
             }
         }
     }
@@ -346,7 +353,7 @@ public class MonitorThingState extends GenericThingState {
                     gcs.setState(UnDefType.UNDEF);
                 }
             } catch (UnsupportedDataTypeException e) {
-                logger.error("{}: context='setMonitorStillImage' Exception occurred", logIdentifier, e);
+                logger.error("{}: context='setMonitorStillImage' Exception occurred", handler.getLogIdentifier(), e);
             }
         }
     }
@@ -405,7 +412,7 @@ public class MonitorThingState extends GenericThingState {
                     recordingFunction.set((activeEvent != null) ? true : false);
             }
             logger.debug("{}: Recalculate channel state: Function='{}' -> alarmState='{}', recordingState='{}'",
-                    logIdentifier, monitorFunction, alarmedFunction, recordingFunction);
+                    handler.getLogIdentifier(), monitorFunction, alarmedFunction, recordingFunction);
 
             // Calculated based on detailed Monitor Status
             switch (monitorStatus) {
@@ -433,7 +440,7 @@ public class MonitorThingState extends GenericThingState {
 
             }
             logger.debug("{}: Recalculate channel state: DetailedState='{}' -> alarmState='{}', recordingState='{}'",
-                    logIdentifier, monitorStatus.name(), alarmedDetailedState, recordingDetailedState);
+                    handler.getLogIdentifier(), monitorStatus.name(), alarmedDetailedState, recordingDetailedState);
 
             if (monitorStatus == ZoneMinderMonitorStatusEnum.IDLE && !alarmedDetailedState.get()
                     && activeEvent != null) {
@@ -472,7 +479,7 @@ public class MonitorThingState extends GenericThingState {
                     break;
             }
         } catch (Exception ex) {
-            logger.error("{}: context='recalculate' Exception occurred", logIdentifier, ex);
+            logger.error("{}: context='recalculate' Exception occurred", handler.getLogIdentifier(), ex);
         } finally {
             isDirty = false;
         }
@@ -485,7 +492,7 @@ public class MonitorThingState extends GenericThingState {
                 state = new RawType(image.toByteArray(), "image/jpeg");
             }
         } catch (Exception ex) {
-            logger.error("{}: Exception occurred in 'getChannelByteArrayAsRawType()'", logIdentifier, ex);
+            logger.error("{}: Exception occurred in 'getChannelByteArrayAsRawType()'", handler.getLogIdentifier(), ex);
         }
         return state;
     }
