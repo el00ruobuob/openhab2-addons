@@ -65,6 +65,7 @@ import name.eskildsen.zoneminder.internal.ZoneMinderContentResponse;
  */
 public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
         implements ChannelStateChangeSubscriber, IZoneMinderEventSubscriber {
+    private final Logger logger = LoggerFactory.getLogger(ZoneMinderThingMonitorHandler.class);
 
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Sets
             .newHashSet(ZoneMinderConstants.THING_TYPE_THING_ZONEMINDER_MONITOR);
@@ -73,9 +74,9 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
     // private static final String MONITOR_STATUS_NOT_INIT = "<Not Initialized>";
     // private static final int MAX_MONITOR_STATUS_WATCH_COUNT = 3;
 
-    /** Make sure we can log errors, warnings or what ever somewhere */
-    private final Logger logger = LoggerFactory.getLogger(ZoneMinderThingMonitorHandler.class);
     private RefreshPriority forcedPriority = RefreshPriority.DISABLED;
+
+    private String logIdentifier;
 
     // TODO Not used
     // private String lastMonitorStatus = MONITOR_STATUS_NOT_INIT;
@@ -1097,7 +1098,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
                 break;
             }
         }
-
         if (update) {
             logger.debug("{}: context='updateMonitorProperties' Properties synchronised", getLogIdentifier());
             updateProperties(properties);
@@ -1107,13 +1107,11 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
     @Override
     public String getLogIdentifier() {
         String result = "[MONITOR]";
-
-        try {
-            if (config != null) {
-                result = String.format("[MONITOR-%s]", config.getZoneMinderId().toString());
-            }
-        } catch (Exception ex) {
-            result = "[MONITOR]";
+        if (logIdentifier != null) {
+            result = logIdentifier;
+        } else if (config != null && config.getZoneMinderId() != null) {
+            result = String.format("[MONITOR-%s]", config.getZoneMinderId().toString());
+            logIdentifier = result;
         }
         return result;
     }
