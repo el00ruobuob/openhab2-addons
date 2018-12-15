@@ -295,7 +295,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
     public void dispose() {
         logger.info("{}:  context='dispose' Disposing bridge handler", getLogIdentifier());
 
-        logger.debug("{}: context='dispose' Stopping Discovery service", getLogIdentifier());
+        logger.debug("{}: context='dispose' Stopping discovery service", getLogIdentifier());
         // Remove the discovery service
         if (discoveryService != null) {
             discoveryService.deactivate();
@@ -307,7 +307,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             discoveryRegistration = null;
         }
 
-        logger.debug("{}: context='dispose' Stopping WatchDog task", getLogIdentifier());
+        logger.debug("{}: context='dispose' Stopping watchdog task", getLogIdentifier());
         stopWatchDogTask();
 
         logger.debug("{}: context='dispose' Stopping refresh data task", getLogIdentifier());
@@ -331,11 +331,9 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             } catch (ZoneMinderGeneralException | ZoneMinderResponseException | ZoneMinderInvalidData ex) {
                 logger.error("{}: context='getMonitors' Exception {}", getLogIdentifier(), ex.getMessage(),
                         ex.getCause());
-
             }
         }
         return new ArrayList<>();
-
     }
 
     protected ZoneMinderBridgeServerConfig getBridgeConfig() {
@@ -487,7 +485,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             try {
                 if (thing.getThingTypeUID().equals(ZoneMinderConstants.THING_TYPE_THING_ZONEMINDER_MONITOR)) {
                     ZoneMinderBaseThingHandler thingHandler = (ZoneMinderBaseThingHandler) thing.getHandler();
-
                     if (thingHandler != null) {
                         thingHandler.refreshThing(curPriority);
                     }
@@ -583,7 +580,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         getLogIdentifier(), thing.getBridgeUID(), thing.getUID(), thingHandler);
             }
         }
-
     }
 
     /**
@@ -637,50 +633,34 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
                 statusDescription = "Configuration not found";
                 updateStatus(newStatus, statusDetail, statusDescription);
-
                 logger.error("{}: context='{}' state='{}' check='FAILED' - {}", getLogIdentifier(), context,
                         newStatus.toString(), statusDescription);
-
                 return status;
-
             } else if (config.getHost() == null) {
                 newStatus = ThingStatus.OFFLINE;
                 statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
                 statusDescription = "Host not configured";
-
                 updateStatus(newStatus, statusDetail, statusDescription);
-
                 logger.error("{}: context='{}' state='{}' check='FAILED' - {}", getLogIdentifier(), context,
                         newStatus.toString(), statusDescription);
-
                 return status;
-
             } else if (config.getProtocol() == null) {
                 newStatus = ThingStatus.OFFLINE;
                 statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
                 statusDescription = "Unknown protocol in configuration";
-
                 updateStatus(newStatus, statusDetail, statusDescription);
-
                 logger.error("{}: context='{}' state='{}' check='FAILED' - {}", getLogIdentifier(), context,
                         newStatus.toString(), statusDescription);
                 return status;
-            }
-
-            else if (config.getHttpPort() == null) {
+            } else if (config.getHttpPort() == null) {
                 newStatus = ThingStatus.OFFLINE;
                 statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
                 statusDescription = "HTTP port invalid in configuration";
-
                 updateStatus(newStatus, statusDetail, statusDescription);
-
                 logger.error("{}: context='{}' state='{}' check='FAILED' - {}", getLogIdentifier(), context,
                         newStatus.toString(), statusDescription);
                 return status;
-
-            }
-
-            else if (config.getTelnetPort() == null) {
+            } else if (config.getTelnetPort() == null) {
                 newStatus = ThingStatus.OFFLINE;
                 statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
                 statusDescription = "Telnet port invalid in configuration";
@@ -688,7 +668,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 logger.error("{}: context='{}' state='{}' check='FAILED' - {}", getLogIdentifier(), context,
                         newStatus.toString(), statusDescription);
                 return status;
-
             }
 
             // Configuration verified
@@ -696,11 +675,9 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
 
             logger.debug("{}: context='{}' state='{}' check='PASSED'", getLogIdentifier(), context,
                     newStatus.toString());
-
         } catch (Exception ex) {
             logger.error("{}: context='{}' state='{}' check='FAILED' tag='exception'", getLogIdentifier(), context,
                     newStatus.toString(), ex);
-
         }
         return status;
     }
@@ -737,7 +714,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             status = ZoneMinderConnectionStatus.BINDING_CONFIG_VALIDATE_PASSED;
             logger.debug("{}: context='{}' previousState='OFFLINE' Socket connection to ZM Website (PASSED)",
                     getLogIdentifier(), context);
-
         } catch (UnknownHostException e) {
             newStatus = ThingStatus.OFFLINE;
             statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
@@ -803,7 +779,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                         "{}: context='{}' - ZoneMinderFactory.CreateConnection() called (Protocol='{}', Host='{}', HttpPort='{}', SocketPort='{}', Path='{}', API='{}')",
                         getLogIdentifier(), context, config.getProtocol(), config.getHost(), config.getHttpPort(),
                         config.getTelnetPort(), config.getServerBasePath(), config.getServerApiPath());
-
             }
         } catch (JsonSyntaxException ex) {
             logger.error("{}: context='{}' check='FAILED' - Malformed JSON response. Retry next cycle...",
@@ -869,7 +844,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             logger.warn("{}: context='{}' check='FAILED' - Failed to obtain ZoneMinder Connection. Retrying next cycle",
                     getLogIdentifier(), context);
         }
-
         return status;
     }
 
@@ -910,7 +884,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
                 statusDescription = "ZoneMinder Server Daemon not running";
                 updateStatus(newStatus, statusDetail, statusDescription);
-
             }
 
             // Verify that 'OPT_TRIGGER' is set to true in ZoneMinder
@@ -923,14 +896,11 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
                 statusDescription = "ZoneMinder Server option 'OPT_TRIGGERS' not enabled";
                 updateStatus(newStatus, statusDetail, statusDescription);
-
             } else {
                 // Seems like everything is as we want it :-)
                 logger.debug("{}: context='{}' check='PASSED' - ZoneMinder ", getLogIdentifier(), context);
                 status = ZoneMinderConnectionStatus.ZONEMINDER_SERVER_CONFIG_PASSED;
-
             }
-
         } catch (ZoneMinderException | Exception ex) {
             if (ex.getMessage() != null) {
                 logger.error(
@@ -944,7 +914,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             statusDetail = ThingStatusDetail.CONFIGURATION_ERROR;
             statusDescription = "ZoneMinder Server configuration not verified ";
             updateStatus(newStatus, statusDetail, statusDescription);
-
         } finally {
             releaseSession();
         }
@@ -970,7 +939,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
          * Retry handling
          *
          *******************************/
-        // An unrecoverable error in the Binding Configuration was found. OR a recoverable has failed and is no
+        // An unrecoverable error in the Binding Configuration was found OR a recoverable has failed and is no
         // unrecoverable (try again later)
         if (getConnectionStatus().hasUnrecoverableError() || (initRetriesCount > initMaxRevoverableRetries)) {
             initRetriesCount++;
@@ -990,23 +959,16 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
 
                 logger.debug("{}: context='{}' state='{}' - Retrying initialization after unrecoverable error",
                         getLogIdentifier(), context, newStatus.toString());
-
             }
             return;
-
         } else if (getConnectionStatus().hasRecoverableError()) {
             initRetriesCount++;
             logger.debug("{}: context='{}' state='{}' - Retrying initialization (Last Error='{}', Retries='{}')",
                     getLogIdentifier(), context, newStatus.toString(), getConnectionStatus().toString(),
                     initRetriesCount);
-
         }
 
-        /***********************************
-         *
-         * Verify Binding Configuration
-         *
-         ***********************************/
+        // Verify Binding Configuration
         setConnectionStatus(verifyBindingConfiguration(currentStatus));
         if (!getConnectionStatus().hasPassed(ZoneMinderConnectionStatus.BINDING_CONFIG_LOAD_PASSED)) {
             return;
@@ -1015,11 +977,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         // Great the Bridge Config is valid get started
         config = getBridgeConfig();
 
-        /***********************************
-         *
-         * Validate Binding Configuration
-         *
-         ***********************************/
+        // Validate Binding Configuration
         setConnectionStatus(validateConfig(config));
 
         // Check that Status corresponds actual state
@@ -1027,11 +985,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             return;
         }
 
-        /***********************************
-         *
-         * VALIDATE ZONEMINDER CONNECTION (API + AUTHENTICATION)
-         *
-         ***********************************/
+        // VALIDATE ZONEMINDER CONNECTION (API + AUTHENTICATION)
         setConnectionStatus(validateConnection(config));
 
         // A previous step failed.
@@ -1039,43 +993,26 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             return;
         }
 
-        /***********************************
-         *
-         * VALIDATE ZONEMINDER HTTP Session
-         *
-         ***********************************/
+        // Validate HTTP Session
         zmConnectStatus = ZoneMinderConnectionStatus.ZONEMINDER_SESSION_CREATED;
         // A previous step failed.
         if (!getConnectionStatus().hasPassed(ZoneMinderConnectionStatus.ZONEMINDER_SESSION_CREATED)) {
             return;
         }
-
-        /***********************************
-         *
-         * VALIDATE ZONEMINDER HTTP Session
-         *
-         ***********************************/
         setConnectionStatus(validateZoneMinderServerConfig());
         if (!getConnectionStatus().hasPassed(ZoneMinderConnectionStatus.ZONEMINDER_SERVER_CONFIG_PASSED)) {
             return;
         }
 
-        /***********************************
-         *
-         * Everything looks fine -> GO ONLINE
-         *
-         ***********************************/
-
+        // Everything looks fine -> GO ONLINE
         zmConnectStatus = ZoneMinderConnectionStatus.INITIALIZED;
         // _zoneMinderSession = curSession;
         newStatus = ThingStatus.ONLINE;
         statusDetail = ThingStatusDetail.NONE;
         statusDescription = "";
-
         updateBridgeStatus(newStatus, statusDetail, statusDescription, true);
         logger.debug("{}:  context='{}' Successfully established session to ZoneMinder Server.", getLogIdentifier(),
                 context);
-
     }
 
     @Override
@@ -1177,16 +1114,16 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 updateBridgeStatus(newStatus, statusDetail, statusDescription, true);
 
                 // Ask all child things to update their Availability Status
+                // FIXME Identify cause of ClassCastException
                 for (Thing thing : getThing().getThings()) {
-                    ZoneMinderBaseThingHandler thingHandler = (ZoneMinderBaseThingHandler) thing.getHandler();
-                    if (thingHandler instanceof ZoneMinderThingMonitorHandler) {
-                        try {
-                            thingHandler.updateAvaliabilityStatus(getZoneMinderConnection());
-                        } catch (Exception ex) {
-                            logger.debug("{}: Failed to call 'updateAvailabilityStatus()' for '{}'", getLogIdentifier(),
-                                    thingHandler.getThing().getUID());
-                        }
+                    if (thing.getHandler() != null) {
+                        continue;
                     }
+                    ZoneMinderThingMonitorHandler thingHandler = (ZoneMinderThingMonitorHandler) thing.getHandler();
+                    if (!(thingHandler instanceof ZoneMinderThingMonitorHandler)) {
+                        continue;
+                    }
+                    thingHandler.updateAvaliabilityStatus(getZoneMinderConnection());
                 }
             } else if (prevStatus == ThingStatus.OFFLINE) {
                 initializeAvaliabilityStatus(conn);
@@ -1200,9 +1137,8 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             }
         } catch (Exception ex) {
             // Hmmm We shouldn't really end here.
-            logger.error(
-                    "{}: context='updateAvailablilityStatus' Exception occurred in updateAvailabilityStatus Exception='{}'",
-                    getLogIdentifier(), ex.getMessage(), ex.getCause(), ex);
+            logger.error("{}: context='updateAvailablilityStatus' Exception occurred in updateAvailabilityStatus: '{}'",
+                    getLogIdentifier(), ex.getMessage(), ex);
             zmConnectStatus = ZoneMinderConnectionStatus.GENERAL_ERROR;
             newStatus = ThingStatus.OFFLINE;
             statusDetail = ThingStatusDetail.COMMUNICATION_ERROR;
@@ -1217,9 +1153,15 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         String curDescription = StringUtils.isBlank(curStatusInfo.getDescription()) ? ""
                 : curStatusInfo.getDescription();
 
+        if (thing.getStatus() == ThingStatus.UNINITIALIZED) {
+            logger.debug("{}: context='updateBridgeStatus' Bridge is UNINITIALIZED, do nothing", getLogIdentifier());
+            return;
+        }
+
         // Status changed
         if ((curStatusInfo.getStatus() != newStatus) || (curStatusInfo.getStatusDetail() != statusDetail)
                 || (!curDescription.equals(statusDescription))) {
+
             if (!curStatusInfo.getStatus().equals(newStatus)) {
                 logger.debug("{}: context='updateBridgeStatus' Bridge status changed from '{}' to '{}'",
                         getLogIdentifier(), thing.getStatus(), newStatus);
@@ -1254,19 +1196,16 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             }
 
             // Ask all child things to update their Availability Status, since Bridge has changed
+            // FIXME Identify cause of ClassCastException
             for (Thing thing : getThing().getThings()) {
-                if (thing.getHandler() != null) {
-                    ZoneMinderBaseThingHandler thingHandler = (ZoneMinderBaseThingHandler) thing.getHandler();
-                    if (thingHandler instanceof ZoneMinderThingMonitorHandler) {
-                        try {
-                            thingHandler.updateAvaliabilityStatus(getZoneMinderConnection());
-                        } catch (Exception ex) {
-                            logger.debug(
-                                    "{}:  context='updateBridgeStatus' Failed to call 'updateAvailabilityStatus' for '{}' (Exception='{}')",
-                                    getLogIdentifier(), thingHandler.getThing().getUID(), ex.getMessage());
-                        }
-                    }
+                if (thing.getHandler() == null) {
+                    continue;
                 }
+                ZoneMinderThingMonitorHandler thingHandler = (ZoneMinderThingMonitorHandler) thing.getHandler();
+                if (!(thingHandler instanceof ZoneMinderThingMonitorHandler)) {
+                    continue;
+                }
+                thingHandler.updateAvaliabilityStatus(getZoneMinderConnection());
             }
         }
     }
@@ -1313,14 +1252,12 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             if (zoneMinderEventSession != null) {
                 logger.debug("{}: context='SubscribeMonitorEvents' thing='monitor' id='{}'", getLogIdentifier(),
                         monitorHandler.getZoneMinderId());
-
                 zoneMinderEventSession.subscribeMonitorEvents(zoneMinderConnection, monitorHandler.getZoneMinderId(),
                         monitorHandler);
             } else {
                 logger.warn(
                         "{}: context='SubscribeMonitorEvents' thing='monitor' id='{}' - Could not subscribe to monitor events, because EventSession not initialisaed",
                         getLogIdentifier(), monitorHandler.getZoneMinderId());
-
             }
         } catch (IllegalArgumentException | GeneralSecurityException | IOException | ZoneMinderUrlNotFoundException e) {
             logger.error("{}: context='SubscribeMonitorEvents' - Exception subscribing for MonitorEvents: {}",
@@ -1331,21 +1268,17 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
     public void unsubscribeMonitorEvents(ZoneMinderThingMonitorHandler monitorHandler) {
         try {
             if (zoneMinderEventSession != null) {
-                zoneMinderEventSession.unsubscribeMonitorEvents(monitorHandler.getZoneMinderId(), monitorHandler);
-
                 logger.debug("{}: context='UnsubscribeMonitorEvents' thing='monitor' id='{}'", getLogIdentifier(),
                         monitorHandler.getZoneMinderId());
-
+                zoneMinderEventSession.unsubscribeMonitorEvents(monitorHandler.getZoneMinderId(), monitorHandler);
             } else {
                 logger.debug("{}: context='UnsubscribeMonitorEvents' thing='monitor' id='{}' - EventSession is null",
                         getLogIdentifier(), monitorHandler.getZoneMinderId());
             }
         } catch (Exception ex) {
-            logger.error(
-                    "{}: context='SubscribeMonitorEvents' - Exception occurred when subscribing for MonitorEvents.",
+            logger.error("{}: context='SubscribeMonitorEvents' - Exception subscribing for MonitorEvents.",
                     getLogIdentifier(), ex);
         }
-
     }
 
     public void activateForceAlarm(String monitorId, Integer priority, String reason, String note, String showText,
@@ -1389,10 +1322,9 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             if ((channelCpuLoad != "") && (isConnected())) {
                 state = new DecimalType(new BigDecimal(channelCpuLoad));
             }
-
         } catch (Exception ex) {
             // Deliberately kept as debug info!
-            logger.debug("{}: context='getServerCpuLoadState' Exception='{}'", getLogIdentifier(), ex.getMessage());
+            logger.debug("{}: context='getServerCpuLoadState' Exception='{}'", getLogIdentifier(), ex.getMessage(), ex);
         }
         return state;
     }
@@ -1405,7 +1337,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             }
         } catch (Exception ex) {
             // Deliberately kept as debug info!
-            logger.debug("{}: context='getServerDiskUsageState' Exception {}", getLogIdentifier(), ex.getMessage());
+            logger.debug("{}: context='getServerDiskUsageState' Exception {}", getLogIdentifier(), ex.getMessage(), ex);
         }
         return state;
     }
@@ -1501,18 +1433,18 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         }
 
         // Inform thing handlers of disconnection
+        // FIXME: What is causing class cast exception
         for (Thing thing : getThing().getThings()) {
-            try {
-                ZoneMinderBaseThingHandler thingHandler = (ZoneMinderBaseThingHandler) thing.getHandler();
-                if (thingHandler != null) {
-                    thingHandler.onBridgeDisconnected(this);
-                    logger.debug("{}: onDisconnected(): Bridge - {}, Thing - {}, Thing Handler - {}",
-                            getLogIdentifier(), thing.getBridgeUID(), thing.getUID(), thingHandler);
-                }
-            } catch (ClassCastException e) {
-                // FIXME: What is causing class cast exception
-                logger.error("thingHandler is {}", thing.getHandler(), e);
+            if (thing.getHandler() != null) {
+                continue;
             }
+            ZoneMinderThingMonitorHandler thingHandler = (ZoneMinderThingMonitorHandler) thing.getHandler();
+            if (thingHandler == null) {
+                continue;
+            }
+            thingHandler.onBridgeDisconnected(this);
+            logger.debug("{}: onDisconnected(): Bridge - {}, Thing - {}, Thing Handler - {}", getLogIdentifier(),
+                    thing.getBridgeUID(), thing.getUID(), thingHandler);
         }
     }
 

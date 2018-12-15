@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -102,7 +103,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             this.config = getMonitorConfig();
 
             super.initialize();
-            logger.debug("{}: context='initialize' Monitor Handler Initialized", getLogIdentifier());
 
             dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FORCE_ALARM));
             dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_CAUSE));
@@ -112,11 +112,11 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_ENABLED));
             dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FUNCTION));
             dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_STATE));
-
         } catch (Exception ex) {
             logger.error("{}: Exception occurred when calling 'initialize()'. Exception='{}'", getLogIdentifier(),
-                    ex.getMessage());
+                    ex.getMessage(), ex);
         }
+        logger.debug("{}: context='initialize' Monitor handler initialized", getLogIdentifier());
     }
 
     @Override
@@ -127,10 +127,24 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             logger.debug("{}: Unsubscribing from Monitor Events: {}", getLogIdentifier(),
                     bridge.getThing().getUID().getAsString());
             bridge.unsubscribeMonitorEvents(this);
-
         } catch (Exception ex) {
             logger.error("{}: Exception occurred when calling 'onBridgeDisonnected()'.", getLogIdentifier(), ex);
         }
+        logger.debug("{}:  context='dispose' Monitor handler disposed", getLogIdentifier());
+    }
+
+    @Override
+    public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
+        logger.debug("{}: context='handleConfigurationUpdate'", getLogIdentifier());
+        // super.handleConfigurationUpdate(configurationParameters);
+    }
+
+    @Override
+    protected void updateConfiguration(Configuration configuration) {
+        logger.debug("{}: context='updateConfiguration'", getLogIdentifier());
+        // super.updateConfiguration(configuration);
+        // FIXME What does this mean?
+        // Inform thing handlers of connection
     }
 
     @Override
@@ -522,6 +536,10 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
         ThingStatus newThingStatus = ThingStatus.ONLINE;
         ThingStatusDetail thingStatusDetailed = ThingStatusDetail.NONE;
         String thingStatusDescription = "";
+
+        if (thing.getStatus() == ThingStatus.UNINITIALIZED) {
+            logger.debug("UPDATE_THING_STATUS: THING IS UNINITIALIZED");
+        }
 
         // Is connected to ZoneMinder and thing is ONLINE
         if (isConnected() && getThing().getStatus() == ThingStatus.ONLINE) {
