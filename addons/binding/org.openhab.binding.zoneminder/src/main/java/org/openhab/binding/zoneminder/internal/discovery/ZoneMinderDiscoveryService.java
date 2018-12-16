@@ -32,21 +32,21 @@ import name.eskildsen.zoneminder.data.IMonitorDataGeneral;
 public class ZoneMinderDiscoveryService extends AbstractDiscoveryService {
     private final Logger logger = LoggerFactory.getLogger(ZoneMinderDiscoveryService.class);
 
-    private ZoneMinderServerBridgeHandler serverHandler;
+    private ZoneMinderServerBridgeHandler bridgeHandler;
 
-    public ZoneMinderDiscoveryService(ZoneMinderServerBridgeHandler coordinatorHandler, int searchTime) {
+    public ZoneMinderDiscoveryService(ZoneMinderServerBridgeHandler bridgeHandler, int searchTime) {
         super(searchTime);
-        this.serverHandler = coordinatorHandler;
+        this.bridgeHandler = bridgeHandler;
     }
 
     public void activate() {
-        logger.debug("[DISCOVERY]: Activating ZoneMinder discovery service for {}", serverHandler.getThing().getUID());
+        logger.debug("[DISCOVERY]: Activating ZoneMinder discovery service for {}", bridgeHandler.getThing().getUID());
     }
 
     @Override
     public void deactivate() {
         logger.debug("[DISCOVERY]: Deactivating ZoneMinder discovery service for {}",
-                serverHandler.getThing().getUID());
+                bridgeHandler.getThing().getUID());
     }
 
     @Override
@@ -56,14 +56,14 @@ public class ZoneMinderDiscoveryService extends AbstractDiscoveryService {
 
     @Override
     public void startBackgroundDiscovery() {
-        logger.trace("[DISCOVERY]: Performing background discovery scan for {}", serverHandler.getThing().getUID());
+        logger.trace("[DISCOVERY]: Performing background discovery scan for {}", bridgeHandler.getThing().getUID());
         // removeOlderResults(getTimestampOfLastScan());
         discoverMonitors();
     }
 
     @Override
     public void startScan() {
-        logger.debug("[DISCOVERY]: Starting discovery scan for {}", serverHandler.getThing().getUID());
+        logger.debug("[DISCOVERY]: Starting discovery scan for {}", bridgeHandler.getThing().getUID());
         discoverMonitors();
     }
 
@@ -82,33 +82,26 @@ public class ZoneMinderDiscoveryService extends AbstractDiscoveryService {
     }
 
     protected synchronized void discoverMonitors() {
-        for (IMonitorDataGeneral monitorData : serverHandler.getMonitors()) {
+        for (IMonitorDataGeneral monitorData : bridgeHandler.getMonitors()) {
             ThingUID thingUID = getMonitorThingUID(monitorData);
-
             logger.trace("[DISCOVERY]: Monitor with Id='{}' and Name='{}' added to Inbox with ThingUID='{}'",
                     monitorData.getId(), monitorData.getName(), thingUID);
-
-            DiscoveryResult discoveryResult = createMonitorDiscoveryResult(thingUID, monitorData);
-            thingDiscovered(discoveryResult);
+            thingDiscovered(createMonitorDiscoveryResult(thingUID, monitorData));
         }
     }
 
     private ThingUID getMonitorThingUID(IMonitorDataGeneral monitor) {
-        ThingUID bridgeUID = serverHandler.getThing().getUID();
+        ThingUID bridgeUID = bridgeHandler.getThing().getUID();
         String monitorUID = String.format("%s-%s", ZoneMinderConstants.THING_ZONEMINDER_MONITOR, monitor.getId());
 
         return new ThingUID(ZoneMinderConstants.THING_TYPE_THING_ZONEMINDER_MONITOR, bridgeUID, monitorUID);
     }
 
     protected DiscoveryResult createMonitorDiscoveryResult(ThingUID monitorUID, IMonitorDataGeneral monitorData) {
-        ThingUID bridgeUID = serverHandler.getThing().getUID();
+        ThingUID bridgeUID = bridgeHandler.getThing().getUID();
 
         Map<String, Object> properties = new HashMap<>(0);
         properties.put(ZoneMinderConstants.PARAMETER_MONITOR_ID, Integer.valueOf(monitorData.getId()));
-        // FIXME This is overwriting config changes made to a monitor thing
-        // properties.put(ZoneMinderConstants.PARAMETER_MONITOR_TRIGGER_TIMEOUT,
-        // ZoneMinderConstants.PARAMETER_MONITOR_TRIGGER_TIMEOUT_DEFAULTVALUE);
-        // properties.put(ZoneMinderConstants.PARAMETER_MONITOR_EVENTTEXT, ZoneMinderConstants.MONITOR_EVENT_OPENHAB);
 
         return DiscoveryResultBuilder.create(monitorUID).withProperties(properties).withBridge(bridgeUID)
                 .withLabel(buildMonitorLabel(monitorData.getId(), monitorData.getName())).build();

@@ -9,7 +9,6 @@
 package org.openhab.binding.zoneminder.internal.handler;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -213,91 +212,70 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
      * Method to Refresh Thing Handler.
      */
     public final void refreshThing(RefreshPriority refreshPriority) {
-        boolean isLocked = false;
+        String context = "refreshThing";
+
+        if (!isConnected()) {
+            return;
+        }
+        // TODO Use RentrantLock isLocked() method
+        // boolean isLocked = false;
         try {
-            if (!isConnected()) {
-                return;
-            }
             if (refreshPriority == RefreshPriority.PRIORITY_ALARM) {
                 if (!lockRefresh.tryLock()) {
-                    logger.warn("{}: context='refreshThing' Can't get refresh lock for '{}' - skipping refreshThing",
-                            getLogIdentifier(), getThing().getUID());
-                    isLocked = false;
+                    logger.info("{}: context='{}' Can't get refresh lock for '{}' - skipping refreshThing",
+                            getLogIdentifier(), context, getThing().getUID());
+                    // isLocked = false;
                     return;
                 }
             } else {
                 lockRefresh.lock();
             }
-            isLocked = true;
+            // isLocked = true;
 
             if (getZoneMinderBridgeHandler() != null) {
                 onFetchData(refreshPriority);
             } else {
-                logger.warn("{}: context='refreshThing' - BridgeHandler not accessible for '{}', skipping refreshThing",
-                        getLogIdentifier(), getThing().getUID());
+                logger.info("{}: context='{}' BridgeHandler not accessible for '{}', skipping refreshThing",
+                        getLogIdentifier(), context, getThing().getUID());
             }
 
             if (!isThingRefreshed()) {
-                Thing thing = getThing();
-                List<Channel> channels = thing.getChannels();
-                logger.trace("{}: context=refreshThing': Refreshing Channels for '{}'", getLogIdentifier(),
-                        thing.getUID());
-
-                for (Channel channel : channels) {
+                logger.trace("{}: context='{}' Refreshing channels for '{}'", getLogIdentifier(), context,
+                        getThing().getUID());
+                for (Channel channel : getThing().getChannels()) {
                     updateChannel(channel.getUID());
                 }
                 this.channelRefreshDone();
             }
         } catch (Exception ex) {
-            logger.error("{}: context='refreshThing' - Exception when refreshing '{}' ", getLogIdentifier(),
+            logger.error("{}: context='{}' - Exception when refreshing '{}' ", getLogIdentifier(), context,
                     getThing().getUID(), ex);
         } finally {
-            if (isLocked) {
+            // if (isLocked) {
+            if (lockRefresh.isLocked()) {
                 lockRefresh.unlock();
             }
         }
     }
 
-    /**
-     * Get the Bridge Handler for ZoneMinder.
-     *
-     * @return zoneMinderBridgeHandler
-     */
-    public /* synchronized */ZoneMinderServerBridgeHandler getZoneMinderBridgeHandler() {
-        if (this.zoneMinderBridgeHandler == null) {
+    // Utility method to get the bridge handler
+    // TODO Is this synchronization needed?
+    // public synchronized ZoneMinderServerBridgeHandler getZoneMinderBridgeHandler() {
+    public ZoneMinderServerBridgeHandler getZoneMinderBridgeHandler() {
+        if (zoneMinderBridgeHandler == null) {
             Bridge bridge = getBridge();
-
             if (bridge == null) {
-                logger.warn("{}: context='getZoneMinderBridgeHandler' - Unable to get bridge!", getLogIdentifier());
+                logger.info("{}: context='getZoneMinderBridgeHandler' Unable to get bridge!", getLogIdentifier());
                 return null;
             }
-
-            logger.debug("{}: context='getZoneMinderBridgeHandler' Bridge for '{}' - '{}'", getLogIdentifier(),
-                    getThing().getUID(), bridge.getUID());
-            ThingHandler handler = null;
-            try {
-                handler = bridge.getHandler();
-            } catch (Exception ex) {
-                logger.debug("{}: Exception in 'getZoneMinderBridgeHandler()': {}", getLogIdentifier(),
-                        ex.getMessage());
-            }
-
-            if (handler instanceof ZoneMinderServerBridgeHandler) {
-                this.zoneMinderBridgeHandler = (ZoneMinderServerBridgeHandler) handler;
-            } else {
-                logger.debug("{}: context='getZoneMinderBridgeHandler' Unable to get bridge handler!",
-                        getLogIdentifier());
+            ThingHandler handler = bridge.getHandler();
+            if (handler != null && handler instanceof ZoneMinderServerBridgeHandler) {
+                zoneMinderBridgeHandler = (ZoneMinderServerBridgeHandler) handler;
             }
         }
-
-        return this.zoneMinderBridgeHandler;
+        return zoneMinderBridgeHandler;
     }
 
-    /**
-     * Method to Update a Channel
-     *
-     * @param channel
-     */
     @Override
     public void updateChannel(ChannelUID channel) {
         switch (channel.getId()) {
@@ -305,13 +283,14 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
                 updateState(channel, getChannelBoolAsOnOffState(isThingOnline()));
                 break;
             default:
-                logger.error("{}: updateChannel() unknown channel in base class '{}', must be handled in super class.",
+                logger.debug("{}: updateChannel() unknown channel in base class '{}', must be handled in super class.",
                         getLogIdentifier(), channel.getId());
         }
     }
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
+        // No commands are handled in the base class
     }
 
     @Override
@@ -329,16 +308,10 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
         zoneMinderConnection = null;
     }
 
-    /**
-     * Get Channel by ChannelUID.
-     *
-     * @param {ChannelUID} channelUID Identifier of Channel
-     */
+    // Get Channel by ChannelUID
     public Channel getChannel(ChannelUID channelUID) {
         Channel channel = null;
-        List<Channel> channels = getThing().getChannels();
-
-        for (Channel ch : channels) {
+        for (Channel ch : getThing().getChannels()) {
             if (channelUID == ch.getUID()) {
                 channel = ch;
                 break;
@@ -347,24 +320,18 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
         return channel;
     }
 
-    /**
-     * Get Thing Handler refresh status.
-     *
-     * @return thingRefresh
+    /*
+     * Get Thing Handler refresh status
      */
     public boolean isThingRefreshed() {
         return (thingRefresh.get() > 0) ? false : true;
-        // return (thingRefresh > 0) ? false : true;
     }
 
-    /**
+    /*
      * Set Thing Handler refresh status.
-     *
-     * @param {boolean} refreshed Sets status refreshed of thing
      */
     public void requestChannelRefresh() {
         thingRefresh.incrementAndGet();
-        // this.thingRefresh = this.thingRefresh + 1;
     }
 
     public void channelRefreshDone() {
@@ -375,63 +342,38 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
 
     protected abstract String getZoneMinderThingType();
 
-    private Object getConfigValue(String configKey) {
-        return getThing().getConfiguration().getProperties().get(configKey);
-    }
-
-    /*
-     * Helper to get a value from configuration as a String
-     *
-     * @author Martin S. Eskildsen
-     *
-     */
+    // Helper to get a value from configuration as a String
     protected String getConfigValueAsString(String configKey) {
         return (String) getConfigValue(configKey);
     }
 
-    /*
-     * Helper to get a value from configuration as a Integer
-     *
-     * @author Martin S. Eskildsen
-     *
-     */
+    // Helper to get a value from configuration as a Integer
     protected Integer getConfigValueAsInteger(String configKey) {
         return (Integer) getConfigValue(configKey);
     }
 
+    // Helper to get a value from configuration as a BigDecimal
     protected BigDecimal getConfigValueAsBigDecimal(String configKey) {
         return (BigDecimal) getConfigValue(configKey);
     }
 
+    private Object getConfigValue(String configKey) {
+        return getThing().getConfiguration().getProperties().get(configKey);
+    }
+
     protected State getChannelStringAsStringState(String channelValue) {
         State state = UnDefType.UNDEF;
-
-        try {
-            if (isConnected()) {
-                state = new StringType(channelValue);
-            }
-
-        } catch (Exception ex) {
-
-            logger.error("{}: Exception occurred in 'getChannelStringAsStringState' ", getLogIdentifier(), ex);
+        if (isConnected()) {
+            state = new StringType(channelValue);
         }
-
         return state;
-
     }
 
     protected State getChannelBoolAsOnOffState(boolean value) {
         State state = UnDefType.UNDEF;
-
-        try {
-            if (isConnected()) {
-                state = value ? OnOffType.ON : OnOffType.OFF;
-            }
-
-        } catch (Exception ex) {
-            logger.error("{}: Exception occurred in 'getChannelBoolAsOnOffState()' ", getLogIdentifier(), ex);
+        if (isConnected()) {
+            state = value ? OnOffType.ON : OnOffType.OFF;
         }
-
         return state;
     }
 
