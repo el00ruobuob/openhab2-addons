@@ -221,9 +221,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
     public void initialize() {
         try {
             zoneMinderConnection = null;
-
             taskRefreshData = null;
-
             updateStatus(ThingStatus.OFFLINE);
 
             ZoneMinderBridgeServerConfig config = getBridgeConfig();
@@ -251,9 +249,30 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 logger.error("{}: 'ZoneMinderServerBridgeHandler' failed to initialize", getLogIdentifier(), ex);
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.HANDLER_INITIALIZING_ERROR);
             }
-
         }
         initialized = false;
+    }
+
+    @Override
+    public void dispose() {
+        logger.info("{}: context='dispose' Disposing bridge handler", getLogIdentifier());
+
+        logger.debug("{}: context='dispose' Stopping discovery service", getLogIdentifier());
+        // Remove the discovery service
+        if (discoveryService != null) {
+            discoveryService.deactivate();
+            discoveryService = null;
+        }
+        if (discoveryRegistration != null) {
+            discoveryRegistration.unregister();
+            discoveryRegistration = null;
+        }
+
+        logger.debug("{}: context='dispose' Stopping watchdog task", getLogIdentifier());
+        stopWatchDogTask();
+
+        logger.debug("{}: context='dispose' Stopping refresh data task", getLogIdentifier());
+        stopTask(taskRefreshData);
     }
 
     protected IZoneMinderConnectionHandler aquireSession() {
@@ -289,31 +308,6 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         super.updateConfiguration(configuration);
         // TODO Why is this necessary?
         // Inform thing handlers of connection
-    }
-
-    /**
-     */
-    @Override
-    public void dispose() {
-        logger.info("{}:  context='dispose' Disposing bridge handler", getLogIdentifier());
-
-        logger.debug("{}: context='dispose' Stopping discovery service", getLogIdentifier());
-        // Remove the discovery service
-        if (discoveryService != null) {
-            discoveryService.deactivate();
-            discoveryService = null;
-        }
-
-        if (discoveryRegistration != null) {
-            discoveryRegistration.unregister();
-            discoveryRegistration = null;
-        }
-
-        logger.debug("{}: context='dispose' Stopping watchdog task", getLogIdentifier());
-        stopWatchDogTask();
-
-        logger.debug("{}: context='dispose' Stopping refresh data task", getLogIdentifier());
-        stopTask(taskRefreshData);
     }
 
     protected String getThingId() {

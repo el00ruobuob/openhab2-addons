@@ -97,46 +97,35 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
 
     @Override
     public void initialize() {
-        logger.info("{}:  context='initialize' Initializing monitor handler", getLogIdentifier());
-        try {
-            this.config = getMonitorConfig();
+        logger.info("{}: context='initialize' Initializing monitor handler", getLogIdentifier());
+        this.config = getMonitorConfig();
+        super.initialize();
 
-            super.initialize();
-
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FORCE_ALARM));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_CAUSE));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_RECORD_STATE));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_MOTION_EVENT));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_DETAILED_STATUS));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_ENABLED));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FUNCTION));
-            dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_STATE));
-        } catch (Exception ex) {
-            logger.error("{}: Exception occurred when calling 'initialize()'. Exception='{}'", getLogIdentifier(),
-                    ex.getMessage(), ex);
-        }
+        dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FORCE_ALARM));
+        dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_CAUSE));
+        dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_RECORD_STATE));
+        dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_MOTION_EVENT));
+        dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_DETAILED_STATUS));
+        dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_ENABLED));
+        dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_FUNCTION));
+        dataConverter.addChannel(getChannelUIDFromChannelId(ZoneMinderConstants.CHANNEL_MONITOR_EVENT_STATE));
         logger.debug("{}: context='initialize' Monitor handler initialized", getLogIdentifier());
     }
 
     @Override
     public void dispose() {
-        logger.info("{}:  context='dispose' Disposing monitor handler", getLogIdentifier());
-        try {
-            ZoneMinderServerBridgeHandler bridge = getZoneMinderBridgeHandler();
-            logger.debug("{}: Unsubscribing from Monitor Events: {}", getLogIdentifier(),
-                    bridge.getThing().getUID().getAsString());
-            bridge.unsubscribeMonitorEvents(this);
-        } catch (Exception ex) {
-            logger.error("{}: Exception occurred when calling 'onBridgeDisonnected()'.", getLogIdentifier(), ex);
-        }
-        logger.debug("{}:  context='dispose' Monitor handler disposed", getLogIdentifier());
+        logger.info("{}: context='dispose' Disposing monitor handler", getLogIdentifier());
+        ZoneMinderServerBridgeHandler bridge = getZoneMinderBridgeHandler();
+        logger.debug("{}: Unsubscribing from Monitor Events: {}", getLogIdentifier(),
+                bridge.getThing().getUID().getAsString());
+        bridge.unsubscribeMonitorEvents(this);
+        logger.debug("{}: context='dispose' Monitor handler disposed", getLogIdentifier());
     }
 
     @Override
     public String getZoneMinderId() {
         if (config == null) {
-            logger.error("{}: Configuration for Thing '{}' is not loaded correctly.", getLogIdentifier(),
-                    getThing().getUID());
+            logger.error("{}: Configuration for Thing '{}' is null!.", getLogIdentifier(), getThing().getUID());
             return "";
         }
         return config.getZoneMinderId().toString();
