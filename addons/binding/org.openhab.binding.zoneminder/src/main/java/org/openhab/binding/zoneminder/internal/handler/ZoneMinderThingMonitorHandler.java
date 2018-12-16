@@ -11,10 +11,8 @@ package org.openhab.binding.zoneminder.internal.handler;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -132,20 +130,6 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
             logger.error("{}: Exception occurred when calling 'onBridgeDisonnected()'.", getLogIdentifier(), ex);
         }
         logger.debug("{}:  context='dispose' Monitor handler disposed", getLogIdentifier());
-    }
-
-    // TODO Test this
-    @Override
-    public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
-        logger.debug("{}: context='handleConfigurationUpdate'", getLogIdentifier());
-        Configuration configuration = editConfiguration();
-
-        for (Entry<String, Object> configurationParmeter : configurationParameters.entrySet()) {
-            logger.debug("{}: context='handleConfigurationUpdate' {}={}", getLogIdentifier(),
-                    configurationParmeter.getKey(), configurationParmeter.getValue());
-            configuration.put(configurationParmeter.getKey(), configurationParmeter.getValue());
-        }
-        updateConfiguration(configuration);
     }
 
     @Override
