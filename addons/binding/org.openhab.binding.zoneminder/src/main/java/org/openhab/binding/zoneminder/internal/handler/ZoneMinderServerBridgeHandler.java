@@ -38,6 +38,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
+import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
@@ -286,6 +287,7 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
     @Override
     protected void updateConfiguration(Configuration configuration) {
         super.updateConfiguration(configuration);
+        // TODO Why is this necessary?
         // Inform thing handlers of connection
     }
 
@@ -340,20 +342,19 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         return this.getConfigAs(ZoneMinderBridgeServerConfig.class);
     }
 
-    /**
-    *
-    */
     public ZoneMinderBaseThingHandler getZoneMinderThingHandlerFromZoneMinderId(ThingTypeUID thingTypeUID,
             String zoneMinderId) {
-        // Inform thing handlers of connection
-        List<Thing> things = getThing().getThings();
-
-        for (Thing thing : things) {
-            ZoneMinderBaseThingHandler thingHandler = (ZoneMinderBaseThingHandler) thing.getHandler();
-
-            if (thingHandler != null && (thingHandler.getZoneMinderId().equals(zoneMinderId))
-                    && (thing.getThingTypeUID().equals(thingTypeUID))) {
-                return thingHandler;
+        // FIXME
+        for (Thing thing : getThing().getThings()) {
+            ThingHandler handler = thing.getHandler();
+            if (handler == null) {
+                continue;
+            }
+            if (handler instanceof ZoneMinderThingMonitorHandler) {
+                ZoneMinderThingMonitorHandler h = (ZoneMinderThingMonitorHandler) handler;
+                if ((h.getZoneMinderId().equals(zoneMinderId)) && (thing.getThingTypeUID().equals(thingTypeUID))) {
+                    return h;
+                }
             }
         }
         return null;
@@ -563,21 +564,23 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         logger.debug("{}: [{}]: onConnected(): Bridge Connected!", getLogIdentifier(), getThingId());
         onBridgeConnected(this, getZoneMinderConnection());
 
+        // FIXME
         // Inform thing handlers of connection
-        List<Thing> things = getThing().getThings();
-
-        for (Thing thing : things) {
-            ZoneMinderBaseThingHandler thingHandler = (ZoneMinderBaseThingHandler) thing.getHandler();
-
-            if (thingHandler != null) {
+        for (Thing thing : getThing().getThings()) {
+            ThingHandler handler = thing.getHandler();
+            if (handler == null) {
+                continue;
+            }
+            logger.debug("{}: context='onConnected': HANDLER IS OF CLASS {}", getLogIdentifier(), handler.getClass());
+            if (handler instanceof ZoneMinderThingMonitorHandler) {
                 try {
-                    thingHandler.onBridgeConnected(this, getZoneMinderConnection());
+                    ((ZoneMinderThingMonitorHandler) handler).onBridgeConnected(this, getZoneMinderConnection());
                 } catch (IllegalArgumentException e) {
-                    logger.error("{}: context='onConnected' failed - Exceprion: {}", getLogIdentifier(),
-                            e.getMessage());
+                    logger.error("{}: context='onConnected' failed - Exception: {}", getLogIdentifier(), e.getMessage(),
+                            e);
                 }
                 logger.debug("{}: context='onConnected': Bridge - {}, Thing - {}, Thing Handler - {}",
-                        getLogIdentifier(), thing.getBridgeUID(), thing.getUID(), thingHandler);
+                        getLogIdentifier(), thing.getBridgeUID(), thing.getUID(), handler);
             }
         }
     }
@@ -590,16 +593,17 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
 
         onBridgeDisconnected(this);
 
-        // Inform thing handlers of disconnection
-        List<Thing> things = getThing().getThings();
-
-        for (Thing thing : things) {
-            ZoneMinderBaseThingHandler thingHandler = (ZoneMinderBaseThingHandler) thing.getHandler();
-
-            if (thingHandler != null) {
-                thingHandler.onBridgeDisconnected(this);
+        // FIXME Identify cause of ClassCastException
+        for (Thing thing : getThing().getThings()) {
+            ThingHandler handler = thing.getHandler();
+            if (handler == null) {
+                continue;
+            }
+            logger.debug("{}: onDisconnected(): HANDLER IS OF CLASS {}", getLogIdentifier(), handler.getClass());
+            if (handler instanceof ZoneMinderThingMonitorHandler) {
+                ((ZoneMinderThingMonitorHandler) handler).onBridgeDisconnected(this);
                 logger.debug("{}: context='onDisconnected': Bridge - {}, Thing - {}, Thing Handler - {}",
-                        getLogIdentifier(), thing.getBridgeUID(), thing.getUID(), thingHandler);
+                        getLogIdentifier(), thing.getBridgeUID(), thing.getUID(), handler);
             }
         }
     }
@@ -1116,14 +1120,13 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
                 // Ask all child things to update their Availability Status
                 // FIXME Identify cause of ClassCastException
                 for (Thing thing : getThing().getThings()) {
-                    if (thing.getHandler() != null) {
+                    ThingHandler handler = thing.getHandler();
+                    if (handler == null) {
                         continue;
                     }
-                    ZoneMinderThingMonitorHandler thingHandler = (ZoneMinderThingMonitorHandler) thing.getHandler();
-                    if (!(thingHandler instanceof ZoneMinderThingMonitorHandler)) {
-                        continue;
+                    if (handler instanceof ZoneMinderThingMonitorHandler) {
+                        ((ZoneMinderThingMonitorHandler) handler).updateAvaliabilityStatus(getZoneMinderConnection());
                     }
-                    thingHandler.updateAvaliabilityStatus(getZoneMinderConnection());
                 }
             } else if (prevStatus == ThingStatus.OFFLINE) {
                 initializeAvaliabilityStatus(conn);
@@ -1198,14 +1201,15 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
             // Ask all child things to update their Availability Status, since Bridge has changed
             // FIXME Identify cause of ClassCastException
             for (Thing thing : getThing().getThings()) {
-                if (thing.getHandler() == null) {
+                ThingHandler handler = thing.getHandler();
+                if (handler == null) {
                     continue;
                 }
-                ZoneMinderThingMonitorHandler thingHandler = (ZoneMinderThingMonitorHandler) thing.getHandler();
-                if (!(thingHandler instanceof ZoneMinderThingMonitorHandler)) {
-                    continue;
+                logger.debug("{}: updateBridgeStatus(): HANDLER IS OF CLASS {}", getLogIdentifier(),
+                        handler.getClass());
+                if (handler instanceof ZoneMinderThingMonitorHandler) {
+                    ((ZoneMinderThingMonitorHandler) handler).updateAvaliabilityStatus(getZoneMinderConnection());
                 }
-                thingHandler.updateAvaliabilityStatus(getZoneMinderConnection());
             }
         }
     }
@@ -1435,16 +1439,16 @@ public class ZoneMinderServerBridgeHandler extends BaseBridgeHandler implements 
         // Inform thing handlers of disconnection
         // FIXME: What is causing class cast exception
         for (Thing thing : getThing().getThings()) {
-            if (thing.getHandler() != null) {
+            ThingHandler handler = thing.getHandler();
+            if (handler == null) {
                 continue;
             }
-            ZoneMinderThingMonitorHandler thingHandler = (ZoneMinderThingMonitorHandler) thing.getHandler();
-            if (thingHandler == null) {
-                continue;
+            logger.debug("{}: onDisconnected(): HANDLER IS OF CLASS {}", getLogIdentifier(), handler.getClass());
+            if (handler instanceof ZoneMinderThingMonitorHandler) {
+                ((ZoneMinderThingMonitorHandler) handler).onBridgeDisconnected(this);
+                logger.debug("{}: onDisconnected(): Bridge - {}, Thing - {}, Thing Handler - {}", getLogIdentifier(),
+                        thing.getBridgeUID(), thing.getUID(), handler);
             }
-            thingHandler.onBridgeDisconnected(this);
-            logger.debug("{}: onDisconnected(): Bridge - {}, Thing - {}, Thing Handler - {}", getLogIdentifier(),
-                    thing.getBridgeUID(), thing.getUID(), thingHandler);
         }
     }
 

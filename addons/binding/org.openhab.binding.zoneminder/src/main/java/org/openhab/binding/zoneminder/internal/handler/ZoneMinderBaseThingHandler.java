@@ -144,7 +144,6 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
     /**
      * Method to start a priority data refresh task.
      */
-
     protected boolean startAlarmRefresh(long timeout) {
         lockAlarm.lock();
         try {

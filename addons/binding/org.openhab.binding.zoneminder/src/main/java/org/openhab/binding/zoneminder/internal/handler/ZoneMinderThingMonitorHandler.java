@@ -11,6 +11,7 @@ package org.openhab.binding.zoneminder.internal.handler;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.smarthome.config.core.Configuration;
@@ -133,18 +134,18 @@ public class ZoneMinderThingMonitorHandler extends ZoneMinderBaseThingHandler
         logger.debug("{}:  context='dispose' Monitor handler disposed", getLogIdentifier());
     }
 
+    // TODO Test this
     @Override
     public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
         logger.debug("{}: context='handleConfigurationUpdate'", getLogIdentifier());
-        // super.handleConfigurationUpdate(configurationParameters);
-    }
+        Configuration configuration = editConfiguration();
 
-    @Override
-    protected void updateConfiguration(Configuration configuration) {
-        logger.debug("{}: context='updateConfiguration'", getLogIdentifier());
-        // super.updateConfiguration(configuration);
-        // FIXME What does this mean?
-        // Inform thing handlers of connection
+        for (Entry<String, Object> configurationParmeter : configurationParameters.entrySet()) {
+            logger.debug("{}: context='handleConfigurationUpdate' {}={}", getLogIdentifier(),
+                    configurationParmeter.getKey(), configurationParmeter.getValue());
+            configuration.put(configurationParmeter.getKey(), configurationParmeter.getValue());
+        }
+        updateConfiguration(configuration);
     }
 
     @Override

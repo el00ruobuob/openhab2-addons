@@ -105,9 +105,10 @@ public class ZoneMinderDiscoveryService extends AbstractDiscoveryService {
 
         Map<String, Object> properties = new HashMap<>(0);
         properties.put(ZoneMinderConstants.PARAMETER_MONITOR_ID, Integer.valueOf(monitorData.getId()));
-        properties.put(ZoneMinderConstants.PARAMETER_MONITOR_TRIGGER_TIMEOUT,
-                ZoneMinderConstants.PARAMETER_MONITOR_TRIGGER_TIMEOUT_DEFAULTVALUE);
-        properties.put(ZoneMinderConstants.PARAMETER_MONITOR_EVENTTEXT, ZoneMinderConstants.MONITOR_EVENT_OPENHAB);
+        // FIXME This is overwriting config changes made to a monitor thing
+        // properties.put(ZoneMinderConstants.PARAMETER_MONITOR_TRIGGER_TIMEOUT,
+        // ZoneMinderConstants.PARAMETER_MONITOR_TRIGGER_TIMEOUT_DEFAULTVALUE);
+        // properties.put(ZoneMinderConstants.PARAMETER_MONITOR_EVENTTEXT, ZoneMinderConstants.MONITOR_EVENT_OPENHAB);
 
         return DiscoveryResultBuilder.create(monitorUID).withProperties(properties).withBridge(bridgeUID)
                 .withLabel(buildMonitorLabel(monitorData.getId(), monitorData.getName())).build();
