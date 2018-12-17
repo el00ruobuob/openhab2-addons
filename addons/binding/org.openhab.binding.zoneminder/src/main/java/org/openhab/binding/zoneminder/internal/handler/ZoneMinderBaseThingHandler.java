@@ -8,6 +8,8 @@
  */
 package org.openhab.binding.zoneminder.internal.handler;
 
+import static org.openhab.binding.zoneminder.internal.ZoneMinderConstants.CHANNEL_ONLINE;
+
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -28,7 +30,6 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.zoneminder.internal.RefreshPriority;
-import org.openhab.binding.zoneminder.internal.ZoneMinderConstants;
 import org.openhab.binding.zoneminder.internal.config.ZoneMinderThingConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,26 +101,19 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
     }
 
     protected IZoneMinderConnectionHandler aquireSession() {
-        return aquireSessionInternal(false);
-    }
-
-    protected IZoneMinderConnectionHandler aquireSessionWait() {
-        return aquireSessionInternal(false);
-    }
-
-    private IZoneMinderConnectionHandler aquireSessionInternal(boolean timeout) {
         Bridge bridge = getBridge();
         if (bridge != null) {
-            ZoneMinderServerBridgeHandler bh = ((ZoneMinderServerBridgeHandler) bridge.getHandler());
-            if (bh != null) {
-                zoneMinderConnection = bh.getZoneMinderConnection();
-                return bh.getZoneMinderConnection();
+            ZoneMinderServerBridgeHandler handler = ((ZoneMinderServerBridgeHandler) bridge.getHandler());
+            if (handler != null) {
+                zoneMinderConnection = handler.getZoneMinderConnection();
+                return handler.getZoneMinderConnection();
             }
         }
         return null;
     }
 
     protected void releaseSession() {
+        // TODO Why is this commented out?
         // lockSession.unlock();
     }
 
@@ -129,9 +123,8 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
             if (refreshPriority != RefreshPriority.PRIORITY_ALARM) {
                 logger.debug("{}: context='startAlarmRefresh' Starting ALARM refresh...", getLogIdentifier());
                 refreshPriority = RefreshPriority.PRIORITY_ALARM;
-
-                // If already activated and called again, it is the event from ZoneMidner that was triggered from
-                // openHAB
+                // If already activated and called again, it is the
+                // event from ZoneMinder that was triggered from openHAB
                 alarmTimeoutTimestamp = -1;
             }
         } finally {
@@ -194,10 +187,7 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
     protected void onThingStatusChanged(ThingStatus thingStatus) {
     }
 
-    /**
-     * Helper method for getting ChannelUID from ChannelId.
-     *
-     */
+    // Get ChannelUID from ChannelId
     public ChannelUID getChannelUIDFromChannelId(@NonNull String id) {
         Channel ch = thing.getChannel(id);
         if (ch == null) {
@@ -208,9 +198,7 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
 
     protected abstract void onFetchData(RefreshPriority refreshPriority);
 
-    /**
-     * Method to Refresh Thing Handler.
-     */
+    // Refresh Thing Handler
     public final void refreshThing(RefreshPriority refreshPriority) {
         String context = "refreshThing";
 
@@ -247,14 +235,23 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
                 }
                 this.channelRefreshDone();
             }
-        } catch (Exception ex) {
-            logger.error("{}: context='{}' - Exception when refreshing '{}' ", getLogIdentifier(), context,
-                    getThing().getUID(), ex);
         } finally {
             // if (isLocked) {
             if (lockRefresh.isLocked()) {
                 lockRefresh.unlock();
             }
+        }
+    }
+
+    @Override
+    public void updateChannel(ChannelUID channel) {
+        switch (channel.getId()) {
+            case CHANNEL_ONLINE:
+                updateState(channel, getChannelBoolAsOnOffState(isThingOnline()));
+                break;
+            default:
+                logger.debug("{}: updateChannel() unknown channel in base class '{}', must be handled in super class.",
+                        getLogIdentifier(), channel.getId());
         }
     }
 
@@ -274,23 +271,6 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
             }
         }
         return zoneMinderBridgeHandler;
-    }
-
-    @Override
-    public void updateChannel(ChannelUID channel) {
-        switch (channel.getId()) {
-            case ZoneMinderConstants.CHANNEL_ONLINE:
-                updateState(channel, getChannelBoolAsOnOffState(isThingOnline()));
-                break;
-            default:
-                logger.debug("{}: updateChannel() unknown channel in base class '{}', must be handled in super class.",
-                        getLogIdentifier(), channel.getId());
-        }
-    }
-
-    @Override
-    public void handleCommand(ChannelUID channelUID, Command command) {
-        // No commands are handled in the base class
     }
 
     @Override
@@ -400,5 +380,10 @@ public abstract class ZoneMinderBaseThingHandler extends BaseThingHandler implem
             }
             onThingStatusChanged(thingStatus);
         }
+    }
+
+    @Override
+    public void handleCommand(ChannelUID channelUID, Command command) {
+        // No commands are handled in the base class
     }
 }
